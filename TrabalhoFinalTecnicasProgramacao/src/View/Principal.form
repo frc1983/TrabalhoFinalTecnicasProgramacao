@@ -13,9 +13,6 @@
           <Properties>
             <Property name="text" type="java.lang.String" value="Cadastros"/>
           </Properties>
-          <AccessibilityProperties>
-            <Property name="AccessibleContext.accessibleName" type="java.lang.String" value="Cadastros"/>
-          </AccessibilityProperties>
           <SubComponents>
             <MenuItem class="javax.swing.JMenuItem" name="menuItemCadastroUsuario">
               <Properties>

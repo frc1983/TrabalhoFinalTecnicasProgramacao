@@ -41,7 +41,6 @@ public class Principal extends javax.swing.JFrame {
         menuCadastro.add(menuItemCadastroLeilao);
 
         menuBar.add(menuCadastro);
-        menuCadastro.getAccessibleContext().setAccessibleName("Cadastros");
 
         menuLeiloes.setText("Leilões");
 
