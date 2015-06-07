@@ -2,8 +2,8 @@ package Dao;
 
 import Connection.DBConnection;
 import Exception.ConnectionException;
-import Model.TipoUsuario;
-import Model.Usuario;
+import Domain.TipoUsuario;
+import Domain.Usuario;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;

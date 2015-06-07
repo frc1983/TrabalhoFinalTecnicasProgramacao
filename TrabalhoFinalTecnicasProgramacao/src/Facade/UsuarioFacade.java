@@ -2,7 +2,7 @@ package Facade;
 
 import Dao.DAOUsuario;
 import Exception.ConnectionException;
-import Model.Usuario;
+import Domain.Usuario;
 import java.util.Collection;
 
 public class UsuarioFacade {

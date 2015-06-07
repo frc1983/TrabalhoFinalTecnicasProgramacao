@@ -1,7 +1,7 @@
 package Business;
 
 import Exception.UsuarioException;
-import Model.Usuario;
+import Domain.Usuario;
 
 public class UsuarioBusiness {
     public static void validaUsuario(Usuario usuario) throws UsuarioException{

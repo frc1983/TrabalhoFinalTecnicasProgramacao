@@ -1,6 +1,6 @@
 package Helpers;
 
-import Model.TipoUsuario;
+import Domain.TipoUsuario;
 import java.util.ArrayList;
 import java.util.Collection;
 import javafx.util.Pair;
