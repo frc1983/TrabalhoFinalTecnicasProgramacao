@@ -27,6 +27,7 @@ public class DAOTipoUsuario {
                 );
             }
             res.close();
+            sta.close();
             return tipos;
         } catch (SQLException ex) {
             throw new ConnectionException(ex.getCause());

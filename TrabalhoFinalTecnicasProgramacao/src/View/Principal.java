@@ -2,14 +2,14 @@ package View;
 
 import Dao.DAOTipoUsuario;
 import Exception.ConnectionException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
 public class Principal extends javax.swing.JFrame {
 
     public Principal() {
         initComponents();
+        this.setExtendedState(JFrame.MAXIMIZED_BOTH); 
     }
 
     @SuppressWarnings("unchecked")

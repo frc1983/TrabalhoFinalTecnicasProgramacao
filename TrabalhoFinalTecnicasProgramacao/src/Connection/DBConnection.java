@@ -23,7 +23,7 @@ public class DBConnection {
         } catch (SQLException | ClassNotFoundException | InstantiationException | IllegalAccessException ex) {
             throw new ConnectionException(ex);
         }
-
+        
         return connection;
     }
 }

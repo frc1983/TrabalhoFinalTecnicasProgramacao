@@ -1,61 +1,61 @@
 CREATE TABLE Usuario (
 Id int PRIMARY KEY GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1),
-IdTipoUsuario int,
-Nome varchar(255),
-CpfCnpj bigint,
-Email varchar(255)
+IdTipoUsuario int not null,
+Nome varchar(255) not null,
+CpfCnpj varchar(255) unique not null,
+Email varchar(255) not null
 );
 
 CREATE TABLE TipoUsuario (
 Id int PRIMARY KEY GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1),
-Tipo varchar(255)
+Tipo varchar(255) not null
 );
 
 CREATE TABLE Leilao (
 Id int PRIMARY KEY GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1),
-IdUsuario int,
-IdLote int,
-IdNatureza int,
-IdFormaLance int,
-DataInicio timestamp,
-DataTermino timestamp,
+IdUsuario int not null,
+IdLote int not null,
+IdNatureza int not null,
+IdFormaLance int not null,
+DataInicio timestamp not null,
+DataTermino timestamp not null,
 FOREIGN KEY(IdUsuario) REFERENCES Usuario (Id)
 );
 
 CREATE TABLE Natureza (
 Id int PRIMARY KEY GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1),
-Nome varchar(255)
+Nome varchar(255) not null
 );
 
 CREATE TABLE FormaLance (
-Id int PRIMARY KEY,
-Forma varchar(255)
+Id int PRIMARY KEY GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1),
+Forma varchar(255) not null
 );
 
 CREATE TABLE Lote (
 Id int PRIMARY KEY GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1),
-IdBem int,
-Preco decimal(10,2)
+IdBem int not null,
+Preco decimal(10,2) not null
 );
 
 CREATE TABLE Bem (
 Id int PRIMARY KEY GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1),
-IdCategoriaBem int,
-Descricao varchar(255),
-DescricaoCompleta long varchar
+IdCategoriaBem int not null,
+Descricao varchar(255) not null,
+DescricaoCompleta long varchar not null
 );
 
 CREATE TABLE CategoriaBem (
 Id int PRIMARY KEY GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1),
-Categoria varchar(255)
+Categoria varchar(255) not null
 );
 
 CREATE TABLE Lance (
 Id int PRIMARY KEY GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1),
-IdUsuario int,
-IdLote int,
-DataHora timestamp,
-Valor decimal(10,2),
+IdUsuario int not null,
+IdLote int not null,
+DataHora timestamp not null,
+Valor decimal(10,2) not null,
 FOREIGN KEY(IdUsuario) REFERENCES Usuario (Id),
 FOREIGN KEY(IdLote) REFERENCES Lote (Id)
 );
@@ -70,5 +70,11 @@ ALTER TABLE Bem ADD FOREIGN KEY(IdCategoriaBem) REFERENCES CategoriaBem (Id);
 
 
 --INSERTS
-insert into tipousuario VALUES (default, 'COMPRADOR')
-insert into tipousuario VALUES (default, 'VENDEDOR')
+insert into tipousuario VALUES (default, 'COMPRADOR');
+insert into tipousuario VALUES (default, 'VENDEDOR');
+
+insert into Natureza VALUES (default, 'OFERTA');
+insert into Natureza VALUES (default, 'DEMANDA');
+
+insert into FormaLance VALUES (default, 'ABERTO');
+insert into FormaLance VALUES (default, 'FECHADO');

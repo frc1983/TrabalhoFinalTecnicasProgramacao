@@ -1,7 +1,7 @@
 package Model;
 
 public class TipoUsuario {
-    
+
     private Integer id;
     private String tipo;
 

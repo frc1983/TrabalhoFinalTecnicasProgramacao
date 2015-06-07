@@ -13,7 +13,8 @@ public class Usuario implements Serializable{
     private Collection<Lance> lances;
     private TipoUsuario tipoUsuario;
 
-    public Usuario(String nome, String cpfCnpj, String email, TipoUsuario tipo) {
+    public Usuario(int id, String nome, String cpfCnpj, String email, TipoUsuario tipo) {
+        this.id = id;
         this.nome = nome;
         this.cpfCnpj = cpfCnpj;
         this.email = email;
