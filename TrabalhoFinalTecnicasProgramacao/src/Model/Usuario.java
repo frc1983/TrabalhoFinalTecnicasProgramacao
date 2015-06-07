@@ -1,20 +1,19 @@
 package Model;
 
 import java.io.Serializable;
-import java.math.BigInteger;
 import java.util.Collection;
 
 public class Usuario implements Serializable{
     
     private Integer id;
     private String nome;
-    private BigInteger cpfCnpj;
+    private String cpfCnpj;
     private String email;
     private Collection<Leilao> leiloes;
     private Collection<Lance> lances;
     private TipoUsuario tipoUsuario;
 
-    public Usuario(String nome, BigInteger cpfCnpj, String email, TipoUsuario tipo) {
+    public Usuario(String nome, String cpfCnpj, String email, TipoUsuario tipo) {
         this.nome = nome;
         this.cpfCnpj = cpfCnpj;
         this.email = email;
@@ -37,11 +36,11 @@ public class Usuario implements Serializable{
         this.nome = nome;
     }
 
-    public BigInteger getCpfCnpj() {
+    public String getCpfCnpj() {
         return cpfCnpj;
     }
 
-    public void setCpfCnpj(BigInteger cpfcnpj) {
+    public void setCpfCnpj(String cpfcnpj) {
         this.cpfCnpj = cpfcnpj;
     }
 

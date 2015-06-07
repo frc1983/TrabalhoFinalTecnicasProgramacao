@@ -1,5 +1,11 @@
 package View;
 
+import Dao.DAOTipoUsuario;
+import Exception.ConnectionException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.JOptionPane;
+
 public class Principal extends javax.swing.JFrame {
 
     public Principal() {
@@ -32,6 +38,11 @@ public class Principal extends javax.swing.JFrame {
         menuCadastro.setText("Cadastros");
 
         menuItemCadastroUsuario.setText("Usuário");
+        menuItemCadastroUsuario.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                menuItemCadastroUsuarioActionPerformed(evt);
+            }
+        });
         menuCadastro.add(menuItemCadastroUsuario);
 
         menuItemCadastroBens.setText("Bens");
@@ -78,6 +89,17 @@ public class Principal extends javax.swing.JFrame {
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+    private void menuItemCadastroUsuarioActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuItemCadastroUsuarioActionPerformed
+        try {
+            DialogCadastroUsuario dialogCadastro = null;
+            DAOTipoUsuario daoTipoUsuario = new DAOTipoUsuario();
+            dialogCadastro = new DialogCadastroUsuario(daoTipoUsuario.getAll());
+            dialogCadastro.setVisible(true);
+        } catch (ConnectionException ex) {
+            JOptionPane.showMessageDialog(rootPane, ex.getMessage(), "ERRO", JOptionPane.ERROR_MESSAGE);
+        }        
+    }//GEN-LAST:event_menuItemCadastroUsuarioActionPerformed
 
     public static void main(String args[]) {
         try {

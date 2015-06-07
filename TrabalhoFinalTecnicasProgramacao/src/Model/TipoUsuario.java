@@ -8,8 +8,9 @@ public class TipoUsuario {
     public TipoUsuario() {
     }
 
-    public TipoUsuario(Integer id) {
+    public TipoUsuario(Integer id, String tipo) {
         this.id = id;
+        this.tipo = tipo;
     }
 
     public Integer getId() {

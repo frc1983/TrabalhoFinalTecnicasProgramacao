@@ -66,3 +66,9 @@ ALTER TABLE Leilao ADD FOREIGN KEY(IdNatureza) REFERENCES Natureza (Id);
 ALTER TABLE Leilao ADD FOREIGN KEY(IdFormaLance) REFERENCES FormaLance (Id);
 ALTER TABLE Lote ADD FOREIGN KEY(IdBem) REFERENCES Bem (Id);
 ALTER TABLE Bem ADD FOREIGN KEY(IdCategoriaBem) REFERENCES CategoriaBem (Id);
+
+
+
+--INSERTS
+insert into tipousuario VALUES (default, 'COMPRADOR')
+insert into tipousuario VALUES (default, 'VENDEDOR')

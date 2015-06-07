@@ -14,7 +14,7 @@ public class DBConnection {
     private DBConnection() {
     }
 
-    private static synchronized Connection getConnection() throws ConnectionException {
+    public static synchronized Connection getConnection() throws ConnectionException {
         try {
             if (connection == null) {
                 Class.forName("org.apache.derby.jdbc.ClientDriver").newInstance();
