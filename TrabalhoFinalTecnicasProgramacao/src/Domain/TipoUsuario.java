@@ -3,14 +3,14 @@ package Domain;
 public class TipoUsuario {
 
     private Integer id;
-    private String tipo;
+    private String text;
 
     public TipoUsuario() {
     }
 
     public TipoUsuario(Integer id, String tipo) {
         this.id = id;
-        this.tipo = tipo;
+        this.text = tipo;
     }
 
     public Integer getId() {
@@ -22,10 +22,10 @@ public class TipoUsuario {
     }
 
     public String getTipo() {
-        return tipo;
+        return text;
     }
 
     public void setTipo(String tipo) {
-        this.tipo = tipo;
+        this.text = tipo;
     }
 }

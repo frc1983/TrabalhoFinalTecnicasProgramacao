@@ -7,6 +7,7 @@ import Facade.UsuarioFacade;
 import Helpers.PopulateComponents;
 import Domain.TipoUsuario;
 import Domain.Usuario;
+import Helpers.ComboboxHelper;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.Collection;
@@ -19,51 +20,19 @@ import javax.swing.table.TableModel;
 
 public class DialogCadastroUsuario extends javax.swing.JFrame {
 
-    public DialogCadastroUsuario() {
-        initComponents();
-    }
+    private final MouseAdapter tableItemClick;
 
     public DialogCadastroUsuario(Collection<TipoUsuario> tiposUsuario) {
+        this.tableItemClick = new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                editData(tableUsuarios.rowAtPoint(e.getPoint()), tableUsuarios);
+            }
+        };
         initComponents();
         txtUsuarioId.setVisible(false);
         configureComboTipoUsuario(tiposUsuario);
         configureTableUsuarios();
-    }
-
-    private void configureComboTipoUsuario(Collection<TipoUsuario> tiposUsuario) {
-        DefaultComboBoxModel mod = new DefaultComboBoxModel(PopulateComponents.populateComboTipoUsuario(tiposUsuario).toArray());
-        cmbTipoUsuario.setModel(mod);
-    }
-
-    private void configureTableUsuarios() {
-        tableUsuarios.setRowSelectionAllowed(true);
-        tableUsuarios.setColumnSelectionAllowed(false);
-        try {
-            updateTable();
-            tableUsuarios.addMouseListener(new MouseAdapter() {
-                @Override
-                public void mouseClicked(MouseEvent e) {
-                    editData(tableUsuarios.rowAtPoint(e.getPoint()), tableUsuarios);
-                }
-            });
-        } catch (ConnectionException ex) {
-            JOptionPane.showMessageDialog(rootPane, ex.getMessage(), "ERRO", JOptionPane.ERROR_MESSAGE);
-        }
-    }
-
-    private void editData(int index, JTable table) {
-        int numCols = table.getColumnCount();
-        TableModel model = table.getModel();
-
-        System.out.println("Value of data: ");
-        for (int j = 0; j < numCols; j++) {
-            System.out.print("  " + model.getValueAt(index, j));
-            txtUsuarioId.setText(model.getValueAt(index, 0).toString());
-            txtNome.setText(model.getValueAt(index, 1).toString());
-            txtCpfCnpj.setText(model.getValueAt(index, 2).toString());
-            txtEmail.setText(model.getValueAt(index, 3).toString());
-            cmbTipoUsuario.setSelectedItem(model.getValueAt(index, 4).toString());
-        }
     }
 
     @SuppressWarnings("unchecked")
@@ -209,7 +178,7 @@ public class DialogCadastroUsuario extends javax.swing.JFrame {
             int id = Integer.parseInt(txtUsuarioId.getText());
             String nome = txtNome.getText();
             String cpfCnpj = txtCpfCnpj.getText();
-            
+
             String email = txtEmail.getText().toLowerCase();
 
             TipoUsuario tipoUsuario = new TipoUsuario(selectedTipoUsuario.getKey(), selectedTipoUsuario.getValue());
@@ -218,7 +187,7 @@ public class DialogCadastroUsuario extends javax.swing.JFrame {
             UsuarioBusiness.validaUsuario(usuario);
 
             if (facade.cadastrarUsuario(usuario)) {
-                updateTable();
+                refreshTable();
                 clearFields();
                 JOptionPane.showMessageDialog(rootPane, "Usuário cadastrado", null, JOptionPane.INFORMATION_MESSAGE);
             }
@@ -230,59 +199,6 @@ public class DialogCadastroUsuario extends javax.swing.JFrame {
     private void btnLimparActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLimparActionPerformed
         clearFields();
     }//GEN-LAST:event_btnLimparActionPerformed
-
-    private void updateTable() throws ConnectionException {
-        DefaultTableModel model = (DefaultTableModel) tableUsuarios.getModel();
-        model.setRowCount(0);
-        for (Usuario usuario : new UsuarioFacade().buscarTodos()) {
-            if(usuario.getCpfCnpj().length() < 12)
-                usuario.setCpfCnpj(String.format("%011d", Integer.parseInt(usuario.getCpfCnpj())));
-            else if(usuario.getCpfCnpj().length() > 13)
-                usuario.setCpfCnpj(String.format("%014d", Long.parseLong(usuario.getCpfCnpj())));
-            model.addRow(new Object[]{usuario.getId(), usuario.getNome(), usuario.getCpfCnpj(), usuario.getEmail(), usuario.getTipoUsuario().getTipo()});
-        }
-
-    }
-
-    private void clearFields() {
-        txtUsuarioId.setText("0");
-        txtNome.setText("");
-        txtCpfCnpj.setText("");
-        txtEmail.setText("");
-        cmbTipoUsuario.setSelectedIndex(0);
-    }
-
-    public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(DialogCadastroUsuario.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(DialogCadastroUsuario.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(DialogCadastroUsuario.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(DialogCadastroUsuario.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        }
-        //</editor-fold>
-
-        /* Create and display the form */
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                new DialogCadastroUsuario().setVisible(true);
-            }
-        });
-    }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnLimpar;
@@ -299,4 +215,59 @@ public class DialogCadastroUsuario extends javax.swing.JFrame {
     private javax.swing.JTextField txtNome;
     private javax.swing.JTextField txtUsuarioId;
     // End of variables declaration//GEN-END:variables
+
+    private void refreshTable() throws ConnectionException {
+        DefaultTableModel model = (DefaultTableModel) tableUsuarios.getModel();
+        model.setRowCount(0);
+        for (Usuario usuario : new UsuarioFacade().buscarTodos()) {
+            if (usuario.getCpfCnpj().length() < 12) {
+                usuario.setCpfCnpj(String.format("%011d", Integer.parseInt(usuario.getCpfCnpj())));
+            } else if (usuario.getCpfCnpj().length() > 13) {
+                usuario.setCpfCnpj(String.format("%014d", Long.parseLong(usuario.getCpfCnpj())));
+            }
+            model.addRow(new Object[]{usuario.getId(), usuario.getNome(), usuario.getCpfCnpj(), usuario.getEmail(), usuario.getTipoUsuario().getTipo()});
+        }
+
+    }
+
+    private void clearFields() {
+        txtUsuarioId.setText("0");
+        txtNome.setText("");
+        txtCpfCnpj.setText("");
+        txtEmail.setText("");
+        cmbTipoUsuario.setSelectedIndex(0);
+    }
+
+    private void editData(int index, JTable table) {
+        int numCols = table.getColumnCount();
+        TableModel model = table.getModel();
+
+        for (int j = 0; j < numCols; j++) {
+            setFormValues(index, model);
+            ComboboxHelper.setSelected(cmbTipoUsuario, model.getValueAt(index, 4).toString());
+        }
+    }
+    
+    private void setFormValues(int index, TableModel model) {
+        txtUsuarioId.setText(model.getValueAt(index, 0).toString());
+        txtNome.setText(model.getValueAt(index, 1).toString());
+        txtCpfCnpj.setText(model.getValueAt(index, 2).toString());
+        txtEmail.setText(model.getValueAt(index, 3).toString());
+    }
+
+    private void configureComboTipoUsuario(Collection<TipoUsuario> tiposUsuario) {
+        DefaultComboBoxModel mod = new DefaultComboBoxModel(PopulateComponents.populateComboTipoUsuario(tiposUsuario).toArray());
+        cmbTipoUsuario.setModel(mod);
+    }
+    
+    private void configureTableUsuarios() {
+        tableUsuarios.setRowSelectionAllowed(true);
+        tableUsuarios.setColumnSelectionAllowed(false);
+        try {
+            refreshTable();
+            tableUsuarios.addMouseListener(this.tableItemClick);
+        } catch (ConnectionException ex) {
+            JOptionPane.showMessageDialog(rootPane, ex.getMessage(), "ERRO", JOptionPane.ERROR_MESSAGE);
+        }
+    }
 }

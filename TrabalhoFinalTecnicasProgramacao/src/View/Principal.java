@@ -17,23 +17,53 @@ public class Principal extends javax.swing.JFrame {
     private void initComponents() {
 
         jMenuItem1 = new javax.swing.JMenuItem();
+        jLabel1 = new javax.swing.JLabel();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        jTable1 = new javax.swing.JTable();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        jTable2 = new javax.swing.JTable();
+        jLabel2 = new javax.swing.JLabel();
         menuBar = new javax.swing.JMenuBar();
         menuCadastro = new javax.swing.JMenu();
         menuItemCadastroUsuario = new javax.swing.JMenuItem();
         menuItemCadastroBens = new javax.swing.JMenuItem();
         menuItemCadastroLeilao = new javax.swing.JMenuItem();
-        menuLeiloes = new javax.swing.JMenu();
-        menuItemLeilaoAndamento = new javax.swing.JMenuItem();
-        menuItemLeilaoFinalizado = new javax.swing.JMenuItem();
-        jMenu1 = new javax.swing.JMenu();
-        jMenuItem2 = new javax.swing.JMenuItem();
-        jMenuItem3 = new javax.swing.JMenuItem();
 
         jMenuItem1.setText("jMenuItem1");
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Leilões S.A.");
         setPreferredSize(new java.awt.Dimension(800, 600));
+
+        jLabel1.setText("Leilões em Andamento");
+
+        jTable1.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null, null, null, null},
+                {null, null, null, null, null},
+                {null, null, null, null, null},
+                {null, null, null, null, null}
+            },
+            new String [] {
+                "Id", "Valor do Lote", "Usuário do melhor lance", "Melhor Lance", "Data/Hora Lance"
+            }
+        ));
+        jScrollPane1.setViewportView(jTable1);
+
+        jTable2.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null}
+            },
+            new String [] {
+                "Id", "Usuário vencedor", "Valor lance vencedor", "Data/Hora do termino"
+            }
+        ));
+        jScrollPane2.setViewportView(jTable2);
+
+        jLabel2.setText("Leilões Finalizados");
 
         menuCadastro.setText("Cadastros");
 
@@ -53,38 +83,36 @@ public class Principal extends javax.swing.JFrame {
 
         menuBar.add(menuCadastro);
 
-        menuLeiloes.setText("Leilões");
-
-        menuItemLeilaoAndamento.setText("Em andamento");
-        menuLeiloes.add(menuItemLeilaoAndamento);
-
-        menuItemLeilaoFinalizado.setText("Finalizado");
-        menuItemLeilaoFinalizado.setToolTipText("");
-        menuLeiloes.add(menuItemLeilaoFinalizado);
-
-        menuBar.add(menuLeiloes);
-
-        jMenu1.setText("Detalhes");
-
-        jMenuItem2.setText("Em andamento");
-        jMenu1.add(jMenuItem2);
-
-        jMenuItem3.setText("Finalizado");
-        jMenu1.add(jMenuItem3);
-
-        menuBar.add(jMenu1);
-
         setJMenuBar(menuBar);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 400, Short.MAX_VALUE)
+            .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jScrollPane2, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 1097, Short.MAX_VALUE)
+                    .addComponent(jScrollPane1)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel1)
+                            .addComponent(jLabel2))
+                        .addGap(0, 0, Short.MAX_VALUE)))
+                .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 274, Short.MAX_VALUE)
+            .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jLabel1)
+                .addGap(18, 18, 18)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 290, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addComponent(jLabel2)
+                .addGap(18, 18, 18)
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 290, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         pack();
@@ -121,17 +149,17 @@ public class Principal extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JMenu jMenu1;
+    private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel2;
     private javax.swing.JMenuItem jMenuItem1;
-    private javax.swing.JMenuItem jMenuItem2;
-    private javax.swing.JMenuItem jMenuItem3;
+    private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JTable jTable1;
+    private javax.swing.JTable jTable2;
     private javax.swing.JMenuBar menuBar;
     private javax.swing.JMenu menuCadastro;
     private javax.swing.JMenuItem menuItemCadastroBens;
     private javax.swing.JMenuItem menuItemCadastroLeilao;
     private javax.swing.JMenuItem menuItemCadastroUsuario;
-    private javax.swing.JMenuItem menuItemLeilaoAndamento;
-    private javax.swing.JMenuItem menuItemLeilaoFinalizado;
-    private javax.swing.JMenu menuLeiloes;
     // End of variables declaration//GEN-END:variables
 }
