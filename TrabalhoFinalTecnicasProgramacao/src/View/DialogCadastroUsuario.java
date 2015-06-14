@@ -1,16 +1,20 @@
 package View;
 
 import Business.UsuarioBusiness;
+import Dao.DAOTipoUsuario;
 import Exception.ConnectionException;
 import Exception.UsuarioException;
 import Facade.UsuarioFacade;
 import Helpers.PopulateComponents;
 import Domain.TipoUsuario;
 import Domain.Usuario;
+import Exception.PersistenceException;
 import Helpers.ComboboxHelper;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.Collection;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.util.Pair;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JOptionPane;
@@ -22,7 +26,10 @@ public class DialogCadastroUsuario extends javax.swing.JFrame {
 
     private final MouseAdapter tableItemClick;
 
-    public DialogCadastroUsuario(Collection<TipoUsuario> tiposUsuario) {
+    DialogCadastroUsuario() throws ConnectionException, PersistenceException {
+        DAOTipoUsuario daoTipoUsuario = new DAOTipoUsuario();
+        Collection<TipoUsuario> tiposUsuario = daoTipoUsuario.getAll();
+        
         this.tableItemClick = new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -30,7 +37,7 @@ public class DialogCadastroUsuario extends javax.swing.JFrame {
             }
         };
         initComponents();
-        txtUsuarioId.setVisible(false);
+        txtId.setVisible(false);
         configureComboTipoUsuario(tiposUsuario);
         configureTableUsuarios();
     }
@@ -39,7 +46,7 @@ public class DialogCadastroUsuario extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        btnSalvarUsuario = new javax.swing.JButton();
+        btnSalvar = new javax.swing.JButton();
         cmbTipoUsuario = new javax.swing.JComboBox();
         txtNome = new javax.swing.JTextField();
         txtCpfCnpj = new javax.swing.JTextField();
@@ -50,16 +57,16 @@ public class DialogCadastroUsuario extends javax.swing.JFrame {
         jLabel4 = new javax.swing.JLabel();
         jScrollPane1 = new javax.swing.JScrollPane();
         tableUsuarios = new javax.swing.JTable();
-        txtUsuarioId = new javax.swing.JTextField();
+        txtId = new javax.swing.JTextField();
         btnLimpar = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Usuários");
 
-        btnSalvarUsuario.setText("Salvar");
-        btnSalvarUsuario.addActionListener(new java.awt.event.ActionListener() {
+        btnSalvar.setText("Salvar");
+        btnSalvar.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnSalvarUsuarioActionPerformed(evt);
+                btnSalvarActionPerformed(evt);
             }
         });
 
@@ -96,8 +103,8 @@ public class DialogCadastroUsuario extends javax.swing.JFrame {
         });
         jScrollPane1.setViewportView(tableUsuarios);
 
-        txtUsuarioId.setEditable(false);
-        txtUsuarioId.setText("0");
+        txtId.setEditable(false);
+        txtId.setText("0");
 
         btnLimpar.setText("Limpar");
         btnLimpar.addActionListener(new java.awt.event.ActionListener() {
@@ -116,20 +123,20 @@ public class DialogCadastroUsuario extends javax.swing.JFrame {
                     .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 1106, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                            .addComponent(cmbTipoUsuario, javax.swing.GroupLayout.Alignment.LEADING, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(txtNome, javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(txtCpfCnpj, javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(layout.createSequentialGroup()
                                 .addComponent(btnLimpar)
                                 .addGap(160, 160, 160)
-                                .addComponent(btnSalvarUsuario))
+                                .addComponent(btnSalvar))
                             .addComponent(jLabel1, javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jLabel2, javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jLabel3, javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jLabel4, javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(txtEmail, javax.swing.GroupLayout.Alignment.LEADING))
+                            .addComponent(txtEmail, javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(cmbTipoUsuario, javax.swing.GroupLayout.Alignment.LEADING, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addGap(18, 18, 18)
-                        .addComponent(txtUsuarioId, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(txtId, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
         );
@@ -154,8 +161,8 @@ public class DialogCadastroUsuario extends javax.swing.JFrame {
                 .addComponent(txtEmail, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(btnSalvarUsuario)
-                    .addComponent(txtUsuarioId, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnSalvar)
+                    .addComponent(txtId, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(btnLimpar))
                 .addGap(18, 18, 18)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 258, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -170,12 +177,12 @@ public class DialogCadastroUsuario extends javax.swing.JFrame {
         setBounds(0, 55, 1148, 606);
     }// </editor-fold>//GEN-END:initComponents
 
-    private void btnSalvarUsuarioActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSalvarUsuarioActionPerformed
+    private void btnSalvarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSalvarActionPerformed
         try {
             UsuarioFacade facade = new UsuarioFacade();
 
             Pair<Integer, String> selectedTipoUsuario = (Pair<Integer, String>) cmbTipoUsuario.getSelectedItem();
-            int id = Integer.parseInt(txtUsuarioId.getText());
+            int id = Integer.parseInt(txtId.getText());
             String nome = txtNome.getText();
             String cpfCnpj = txtCpfCnpj.getText();
 
@@ -193,8 +200,10 @@ public class DialogCadastroUsuario extends javax.swing.JFrame {
             }
         } catch (ConnectionException | UsuarioException ex) {
             JOptionPane.showMessageDialog(rootPane, ex.getMessage(), "ERRO", JOptionPane.ERROR_MESSAGE);
+        } catch (PersistenceException ex) {
+            Logger.getLogger(DialogCadastroUsuario.class.getName()).log(Level.SEVERE, null, ex);
         }
-    }//GEN-LAST:event_btnSalvarUsuarioActionPerformed
+    }//GEN-LAST:event_btnSalvarActionPerformed
 
     private void btnLimparActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLimparActionPerformed
         clearFields();
@@ -202,7 +211,7 @@ public class DialogCadastroUsuario extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnLimpar;
-    private javax.swing.JButton btnSalvarUsuario;
+    private javax.swing.JButton btnSalvar;
     private javax.swing.JComboBox cmbTipoUsuario;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
@@ -212,11 +221,11 @@ public class DialogCadastroUsuario extends javax.swing.JFrame {
     private javax.swing.JTable tableUsuarios;
     private javax.swing.JTextField txtCpfCnpj;
     private javax.swing.JTextField txtEmail;
+    private javax.swing.JTextField txtId;
     private javax.swing.JTextField txtNome;
-    private javax.swing.JTextField txtUsuarioId;
     // End of variables declaration//GEN-END:variables
 
-    private void refreshTable() throws ConnectionException {
+    private void refreshTable() throws ConnectionException, PersistenceException {
         DefaultTableModel model = (DefaultTableModel) tableUsuarios.getModel();
         model.setRowCount(0);
         for (Usuario usuario : new UsuarioFacade().buscarTodos()) {
@@ -231,7 +240,7 @@ public class DialogCadastroUsuario extends javax.swing.JFrame {
     }
 
     private void clearFields() {
-        txtUsuarioId.setText("0");
+        txtId.setText("0");
         txtNome.setText("");
         txtCpfCnpj.setText("");
         txtEmail.setText("");
@@ -249,7 +258,7 @@ public class DialogCadastroUsuario extends javax.swing.JFrame {
     }
     
     private void setFormValues(int index, TableModel model) {
-        txtUsuarioId.setText(model.getValueAt(index, 0).toString());
+        txtId.setText(model.getValueAt(index, 0).toString());
         txtNome.setText(model.getValueAt(index, 1).toString());
         txtCpfCnpj.setText(model.getValueAt(index, 2).toString());
         txtEmail.setText(model.getValueAt(index, 3).toString());
@@ -260,7 +269,7 @@ public class DialogCadastroUsuario extends javax.swing.JFrame {
         cmbTipoUsuario.setModel(mod);
     }
     
-    private void configureTableUsuarios() {
+    private void configureTableUsuarios() throws PersistenceException {
         tableUsuarios.setRowSelectionAllowed(true);
         tableUsuarios.setColumnSelectionAllowed(false);
         try {

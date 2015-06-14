@@ -1,7 +1,7 @@
 package View;
 
-import Dao.DAOTipoUsuario;
 import Exception.ConnectionException;
+import Exception.PersistenceException;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
@@ -9,7 +9,7 @@ public class Principal extends javax.swing.JFrame {
 
     public Principal() {
         initComponents();
-        this.setExtendedState(JFrame.MAXIMIZED_BOTH); 
+        this.setExtendedState(JFrame.MAXIMIZED_BOTH);
     }
 
     @SuppressWarnings("unchecked")
@@ -76,6 +76,11 @@ public class Principal extends javax.swing.JFrame {
         menuCadastro.add(menuItemCadastroUsuario);
 
         menuItemCadastroBens.setText("Bens");
+        menuItemCadastroBens.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                menuItemCadastroBensActionPerformed(evt);
+            }
+        });
         menuCadastro.add(menuItemCadastroBens);
 
         menuItemCadastroLeilao.setText("Leilão");
@@ -120,14 +125,21 @@ public class Principal extends javax.swing.JFrame {
 
     private void menuItemCadastroUsuarioActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuItemCadastroUsuarioActionPerformed
         try {
-            DialogCadastroUsuario dialogCadastro = null;
-            DAOTipoUsuario daoTipoUsuario = new DAOTipoUsuario();
-            dialogCadastro = new DialogCadastroUsuario(daoTipoUsuario.getAll());
+            DialogCadastroUsuario dialogCadastro = new DialogCadastroUsuario();
             dialogCadastro.setVisible(true);
-        } catch (ConnectionException ex) {
+        } catch (ConnectionException | PersistenceException ex) {
             JOptionPane.showMessageDialog(rootPane, ex.getMessage(), "ERRO", JOptionPane.ERROR_MESSAGE);
-        }        
+        }
     }//GEN-LAST:event_menuItemCadastroUsuarioActionPerformed
+
+    private void menuItemCadastroBensActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuItemCadastroBensActionPerformed
+        try {
+            DialogCadastroBem dialogCadastro = new DialogCadastroBem();
+            dialogCadastro.setVisible(true);
+        } catch (ConnectionException | PersistenceException ex) {
+            JOptionPane.showMessageDialog(rootPane, ex.getMessage(), "ERRO", JOptionPane.ERROR_MESSAGE);
+        }
+    }//GEN-LAST:event_menuItemCadastroBensActionPerformed
 
     public static void main(String args[]) {
         try {
@@ -140,7 +152,7 @@ public class Principal extends javax.swing.JFrame {
         } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | javax.swing.UnsupportedLookAndFeelException ex) {
             java.util.logging.Logger.getLogger(Principal.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
-        
+
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
                 new Principal().setVisible(true);

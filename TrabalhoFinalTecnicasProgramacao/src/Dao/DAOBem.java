@@ -2,9 +2,9 @@ package Dao;
 
 import Connection.ConnectionFactory;
 import Connection.IConnection;
+import Domain.Bem;
+import Domain.CategoriaBem;
 import Exception.ConnectionException;
-import Domain.TipoUsuario;
-import Domain.Usuario;
 import Exception.PersistenceException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -13,10 +13,10 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collection;
 
-public class DAOUsuario {
+public class DAOBem {
 
-    public Collection<Usuario> getAll() throws ConnectionException, PersistenceException {
-        Collection<Usuario> usuarios = new ArrayList<>();
+    public Collection<Bem> getAll() throws ConnectionException, PersistenceException {
+        Collection<Bem> bens = new ArrayList<>();
         IConnection conn = null;
         Statement sta = null;
         ResultSet res = null;
@@ -24,21 +24,20 @@ public class DAOUsuario {
         try {
             conn = ConnectionFactory.getInstance();
 
-            String sql = "SELECT u.*, tu.ID as IdTIPO, tu.TIPO FROM Usuario u INNER JOIN TipoUsuario tu ON u.IdTipoUsuario = tu.Id";
+            String sql = "SELECT b.*, cb.ID as IdCategoria, cb.CATEGORIA FROM Bem b INNER JOIN CategoriaBem cb ON b.IdCategoriaBem = cb.Id";
 
             sta = conn.getConnection().createStatement();
             res = sta.executeQuery(sql);
             while (res.next()) {
-                usuarios.add(new Usuario(
+                bens.add(new Bem(
                         res.getInt("ID"),
-                        res.getString("NOME"),
-                        res.getString("CPFCNPJ"),
-                        res.getString("EMAIL"),
-                        new TipoUsuario(res.getInt("IdTIPO"), res.getString("TIPO"))
+                        res.getString("DESCRICAO"),
+                        res.getString("DESCRICAOCOMPLETA"),
+                        new CategoriaBem(res.getInt("IdCategoria"), res.getString("CATEGORIA"))
                 ));
             }
         } catch (Exception ex) {
-            throw new PersistenceException("Erro ao consultar Usuários.", ex.getCause());
+            throw new PersistenceException("Erro ao consultar Bens.", ex.getCause());
         } finally {
             try {
                 if (res != null && !res.isClosed()) {
@@ -55,31 +54,29 @@ public class DAOUsuario {
             }
         }
 
-        return usuarios;
+        return bens;
     }
 
-    public boolean novoUsuario(Usuario usuario) throws ConnectionException {
-
+    public boolean novoBem(Bem bem) throws ConnectionException {
         IConnection conn = null;
         PreparedStatement sta = null;
         ResultSet res = null;
 
         try {
             conn = ConnectionFactory.getInstance();
-            String sql = "INSERT INTO Usuario (IDTIPOUSUARIO, NOME, CPFCNPJ, EMAIL) VALUES (?,?,?,?)";
+            String sql = "INSERT INTO Bem (IDCATEGORIABEM, DESCRICAO, DESCRICAOCOMPLETA) VALUES (?,?,?)";
 
-            if (usuario.getId() != 0) {
-                sql = "UPDATE Usuario SET IDTIPOUSUARIO = ?, NOME = ?, CPFCNPJ = ?, EMAIL = ? WHERE ID = ?";
+            if (bem.getId() != 0) {
+                sql = "UPDATE Bem SET IDCATEGORIABEM = ?, DESCRICAO = ?, DESCRICAOCOMPLETA = ? WHERE ID = ?";
             }
 
             sta = conn.getConnection().prepareStatement(sql);
-            sta.setInt(1, usuario.getTipoUsuario().getId());
-            sta.setString(2, usuario.getNome());
-            sta.setLong(3, Long.parseLong(usuario.getCpfCnpj()));
-            sta.setString(4, usuario.getEmail());
+            sta.setInt(1, bem.getCategoriaBem().getId());
+            sta.setString(2, bem.getDescricao());
+            sta.setString(3, bem.getDescricaocompleta());
 
-            if (usuario.getId() != 0) {
-                sta.setInt(5, usuario.getId());
+            if (bem.getId() != 0) {
+                sta.setInt(4, bem.getId());
             }
 
             sta.executeUpdate();

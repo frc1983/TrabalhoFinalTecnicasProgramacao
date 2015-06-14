@@ -11,8 +11,11 @@ public class Bem {
     public Bem() {
     }
 
-    public Bem(Integer id) {
+    public Bem(Integer id, String descricao, String descricaoCompleta, CategoriaBem categoriaBem) {
         this.id = id;
+        this.descricao = descricao;
+        this.descricaoCompleta = descricaoCompleta;
+        this.categoriaBem = categoriaBem;
     }
 
     public Integer getId() {

@@ -8,8 +8,9 @@ public class CategoriaBem {
     public CategoriaBem() {
     }
 
-    public CategoriaBem(Integer id) {
+    public CategoriaBem(Integer id, String categoria) {
         this.id = id;
+        this.categoria = categoria;
     }
 
     public Integer getId() {

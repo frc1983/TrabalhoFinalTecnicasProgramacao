@@ -78,3 +78,9 @@ insert into Natureza VALUES (default, 'DEMANDA');
 
 insert into FormaLance VALUES (default, 'ABERTO');
 insert into FormaLance VALUES (default, 'FECHADO');
+
+insert into CategoriaBem VALUES (default, 'Mobiliário');
+insert into CategoriaBem VALUES (default, 'Informática');
+insert into CategoriaBem VALUES (default, 'Máquinas industriais');
+insert into CategoriaBem VALUES (default, 'Máquinas de escritório');
+insert into CategoriaBem VALUES (default, 'Equipamentos hospitalares');
