@@ -2,8 +2,8 @@ package Dao;
 
 import Connection.ConnectionFactory;
 import Connection.IConnection;
+import Domain.Natureza;
 import Exception.ConnectionException;
-import Domain.TipoUsuario;
 import Exception.PersistenceException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -11,11 +11,11 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collection;
 
-public class DAOTipoUsuario implements IDAOTipoUsuario {
+public class DAONatureza implements IDAONatureza {
 
     @Override
-    public Collection<TipoUsuario> getAll() throws ConnectionException, PersistenceException {
-        Collection<TipoUsuario> tipos = new ArrayList<>();
+    public Collection<Natureza> getAll() throws ConnectionException, PersistenceException {
+        Collection<Natureza> naturezas = new ArrayList<>();
         IConnection conn = null;
         Statement sta = null;
         ResultSet res = null;
@@ -23,18 +23,18 @@ public class DAOTipoUsuario implements IDAOTipoUsuario {
         try {
             conn = ConnectionFactory.getInstance();
 
-            String sql = "SELECT * FROM TipoUsuario";
+            String sql = "SELECT * FROM Natureza";
 
             sta = conn.getConnection().createStatement();
             res = sta.executeQuery(sql);
             while (res.next()) {
-                tipos.add(new TipoUsuario(
+                naturezas.add(new Natureza(
                         res.getInt("ID"),
-                        res.getString("TIPO"))
+                        res.getString("Nome"))
                 );
             }
-        } catch (Exception ex) {
-            throw new PersistenceException("Erro ao consultar Tipos de usuários.", ex.getCause());
+        } catch (ConnectionException | SQLException ex) {
+            throw new PersistenceException("Erro ao consultar naturezas.", ex.getCause());
         } finally {
             try {
                 if (res != null && !res.isClosed()) {
@@ -51,6 +51,6 @@ public class DAOTipoUsuario implements IDAOTipoUsuario {
             }
         }
 
-        return tipos;
+        return naturezas;
     }
 }

@@ -84,6 +84,11 @@ public class Principal extends javax.swing.JFrame {
         menuCadastro.add(menuItemCadastroBens);
 
         menuItemCadastroLeilao.setText("Leilão");
+        menuItemCadastroLeilao.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                menuItemCadastroLeilaoActionPerformed(evt);
+            }
+        });
         menuCadastro.add(menuItemCadastroLeilao);
 
         menuBar.add(menuCadastro);
@@ -140,6 +145,15 @@ public class Principal extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(rootPane, ex.getMessage(), "ERRO", JOptionPane.ERROR_MESSAGE);
         }
     }//GEN-LAST:event_menuItemCadastroBensActionPerformed
+
+    private void menuItemCadastroLeilaoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuItemCadastroLeilaoActionPerformed
+        try {
+            DialogCadastroLeilao dialogCadastro = new DialogCadastroLeilao();
+            dialogCadastro.setVisible(true);
+        } catch (ConnectionException | PersistenceException ex) {
+            JOptionPane.showMessageDialog(rootPane, ex.getMessage(), "ERRO", JOptionPane.ERROR_MESSAGE);
+        }
+    }//GEN-LAST:event_menuItemCadastroLeilaoActionPerformed
 
     public static void main(String args[]) {
         try {

@@ -18,6 +18,6 @@ public class BemFacade {
     }
     
     public boolean cadastrarBem(Bem bem) throws ConnectionException{
-        return daoBem.novoBem(bem);
+        return daoBem.insert(bem);
     }
 }

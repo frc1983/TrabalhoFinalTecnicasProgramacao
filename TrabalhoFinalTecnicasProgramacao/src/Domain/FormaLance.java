@@ -8,8 +8,9 @@ public class FormaLance {
     public FormaLance() {
     }
 
-    public FormaLance(Integer id) {
+    public FormaLance(Integer id, String forma) {
         this.id = id;
+        this.forma = forma;
     }
 
     public Integer getId() {

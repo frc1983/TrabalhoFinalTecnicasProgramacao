@@ -11,7 +11,9 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collection;
 
-public class DAOCategoriaBem {
+public class DAOCategoriaBem implements IDAOCategoriaBem {
+    
+    @Override
     public Collection<CategoriaBem> getAll() throws ConnectionException, PersistenceException{
         Collection<CategoriaBem> categorias = new ArrayList<>();
         IConnection conn = null;

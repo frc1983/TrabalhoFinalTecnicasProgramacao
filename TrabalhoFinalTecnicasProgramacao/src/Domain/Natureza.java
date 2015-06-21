@@ -8,8 +8,9 @@ public class Natureza {
     public Natureza() {
     }
 
-    public Natureza(Integer id) {
+    public Natureza(Integer id, String nome) {
         this.id = id;
+        this.nome = nome;
     }
 
     public Integer getId() {

@@ -2,6 +2,7 @@ package View;
 
 import Business.UsuarioBusiness;
 import Dao.DAOTipoUsuario;
+import Dao.IDAOTipoUsuario;
 import Exception.ConnectionException;
 import Exception.UsuarioException;
 import Facade.UsuarioFacade;
@@ -27,7 +28,7 @@ public class DialogCadastroUsuario extends javax.swing.JFrame {
     private final MouseAdapter tableItemClick;
 
     DialogCadastroUsuario() throws ConnectionException, PersistenceException {
-        DAOTipoUsuario daoTipoUsuario = new DAOTipoUsuario();
+        IDAOTipoUsuario daoTipoUsuario = new DAOTipoUsuario();
         Collection<TipoUsuario> tiposUsuario = daoTipoUsuario.getAll();
         
         this.tableItemClick = new MouseAdapter() {
@@ -209,22 +210,6 @@ public class DialogCadastroUsuario extends javax.swing.JFrame {
         clearFields();
     }//GEN-LAST:event_btnLimparActionPerformed
 
-    // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton btnLimpar;
-    private javax.swing.JButton btnSalvar;
-    private javax.swing.JComboBox cmbTipoUsuario;
-    private javax.swing.JLabel jLabel1;
-    private javax.swing.JLabel jLabel2;
-    private javax.swing.JLabel jLabel3;
-    private javax.swing.JLabel jLabel4;
-    private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JTable tableUsuarios;
-    private javax.swing.JTextField txtCpfCnpj;
-    private javax.swing.JTextField txtEmail;
-    private javax.swing.JTextField txtId;
-    private javax.swing.JTextField txtNome;
-    // End of variables declaration//GEN-END:variables
-
     private void refreshTable() throws ConnectionException, PersistenceException {
         DefaultTableModel model = (DefaultTableModel) tableUsuarios.getModel();
         model.setRowCount(0);
@@ -279,4 +264,19 @@ public class DialogCadastroUsuario extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(rootPane, ex.getMessage(), "ERRO", JOptionPane.ERROR_MESSAGE);
         }
     }
+    // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnLimpar;
+    private javax.swing.JButton btnSalvar;
+    private javax.swing.JComboBox cmbTipoUsuario;
+    private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
+    private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JTable tableUsuarios;
+    private javax.swing.JTextField txtCpfCnpj;
+    private javax.swing.JTextField txtEmail;
+    private javax.swing.JTextField txtId;
+    private javax.swing.JTextField txtNome;
+    // End of variables declaration//GEN-END:variables
 }

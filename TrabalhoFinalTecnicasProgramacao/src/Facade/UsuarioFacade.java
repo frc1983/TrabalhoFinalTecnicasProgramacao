@@ -17,7 +17,7 @@ public class UsuarioFacade {
         return daoUsuario.getAll();
     }
     
-    public boolean cadastrarUsuario(Usuario usuario) throws ConnectionException{
-        return daoUsuario.novoUsuario(usuario);
+    public boolean cadastrarUsuario(Usuario usuario) throws ConnectionException, PersistenceException{
+        return daoUsuario.insert(usuario);
     }
 }

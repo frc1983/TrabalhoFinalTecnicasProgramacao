@@ -2,6 +2,7 @@ package View;
 
 import Business.BemBusiness;
 import Dao.DAOCategoriaBem;
+import Dao.IDAOCategoriaBem;
 import Domain.Bem;
 import Domain.CategoriaBem;
 import Exception.ConnectionException;
@@ -25,7 +26,7 @@ public class DialogCadastroBem extends javax.swing.JFrame {
     private final MouseAdapter tableItemClick;
 
     public DialogCadastroBem() throws ConnectionException, PersistenceException {
-        DAOCategoriaBem daoCategoriaBem = new DAOCategoriaBem();
+        IDAOCategoriaBem daoCategoriaBem = new DAOCategoriaBem();
         Collection<CategoriaBem> categorias = daoCategoriaBem.getAll();
         
         this.tableItemClick = new MouseAdapter() {

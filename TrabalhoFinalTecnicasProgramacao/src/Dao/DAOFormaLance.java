@@ -2,8 +2,8 @@ package Dao;
 
 import Connection.ConnectionFactory;
 import Connection.IConnection;
+import Domain.FormaLance;
 import Exception.ConnectionException;
-import Domain.TipoUsuario;
 import Exception.PersistenceException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -11,11 +11,11 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collection;
 
-public class DAOTipoUsuario implements IDAOTipoUsuario {
+public class DAOFormaLance implements IDAOFormaLance {
 
     @Override
-    public Collection<TipoUsuario> getAll() throws ConnectionException, PersistenceException {
-        Collection<TipoUsuario> tipos = new ArrayList<>();
+    public Collection<FormaLance> getAll() throws ConnectionException, PersistenceException {
+        Collection<FormaLance> formasLance = new ArrayList<>();
         IConnection conn = null;
         Statement sta = null;
         ResultSet res = null;
@@ -23,18 +23,18 @@ public class DAOTipoUsuario implements IDAOTipoUsuario {
         try {
             conn = ConnectionFactory.getInstance();
 
-            String sql = "SELECT * FROM TipoUsuario";
+            String sql = "SELECT * FROM FORMALANCE";
 
             sta = conn.getConnection().createStatement();
             res = sta.executeQuery(sql);
             while (res.next()) {
-                tipos.add(new TipoUsuario(
+                formasLance.add(new FormaLance(
                         res.getInt("ID"),
-                        res.getString("TIPO"))
+                        res.getString("FORMA"))
                 );
             }
-        } catch (Exception ex) {
-            throw new PersistenceException("Erro ao consultar Tipos de usuários.", ex.getCause());
+        } catch (ConnectionException | SQLException ex) {
+            throw new PersistenceException("Erro ao consultar Formas de lance.", ex.getCause());
         } finally {
             try {
                 if (res != null && !res.isClosed()) {
@@ -51,6 +51,6 @@ public class DAOTipoUsuario implements IDAOTipoUsuario {
             }
         }
 
-        return tipos;
+        return formasLance;
     }
 }
