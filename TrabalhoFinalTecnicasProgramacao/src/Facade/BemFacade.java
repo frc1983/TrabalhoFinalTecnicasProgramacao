@@ -17,6 +17,10 @@ public class BemFacade {
         return daoBem.getAll();
     }
     
+    public Collection<Bem> buscarTodosDisponiveis() throws ConnectionException, PersistenceException{
+        return daoBem.getAllFree();
+    }
+    
     public boolean cadastrarBem(Bem bem) throws ConnectionException{
         return daoBem.insert(bem);
     }

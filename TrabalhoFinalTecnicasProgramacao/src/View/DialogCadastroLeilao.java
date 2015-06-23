@@ -1,16 +1,5 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package View;
 
-import Dao.DAOBem;
-import Dao.DAOFormaLance;
-import Dao.DAONatureza;
-import Dao.DAOUsuario;
-import Dao.IDAOFormaLance;
-import Dao.IDAONatureza;
 import Domain.Bem;
 import Domain.FormaLance;
 import Domain.Natureza;
@@ -18,47 +7,58 @@ import Domain.Usuario;
 import Enumerators.EnumTipoUsuario;
 import Exception.ConnectionException;
 import Exception.PersistenceException;
+import Facade.BemFacade;
+import Facade.FormaLanceFacade;
+import Facade.NaturezaFacade;
+import Facade.UsuarioFacade;
 import Helpers.PopulateComponents;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
+import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.util.Pair;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListModel;
+import javax.swing.ListModel;
 
 public class DialogCadastroLeilao extends javax.swing.JFrame {
     
-    IDAONatureza daoNatureza;
-    IDAOFormaLance daoFormaLance;
-    DAOUsuario daoUsuario;
-    DAOBem daoBem;
+    NaturezaFacade naturezaFacade;
+    FormaLanceFacade formaLanceFacade;
+    UsuarioFacade usuarioFacade;
+    BemFacade bemFacade;
     
-    Collection<Bem> bensLote;
-    Collection<Bem> bensDisponiveis;
+    Collection<Bem> bensLote = new ArrayList<>();
+    Collection<Bem> bensDisponiveis = new ArrayList<>();
+    
+    DefaultListModel modelLote;
+    DefaultListModel modelDisponiveis;
     
     public DialogCadastroLeilao() throws ConnectionException, PersistenceException {
         initComponents();
         
-        daoNatureza = new DAONatureza();
-        Collection<Natureza> naturezas = daoNatureza.getAll();
+        naturezaFacade = new NaturezaFacade();
+        Collection<Natureza> naturezas = naturezaFacade.buscarTodos();
         
-        daoFormaLance = new DAOFormaLance();
-        Collection<FormaLance> formasLance = daoFormaLance.getAll();
+        formaLanceFacade = new FormaLanceFacade();
+        Collection<FormaLance> formasLance = formaLanceFacade.buscarTodos();
         
-        daoUsuario = new DAOUsuario();        
-        daoBem = new DAOBem();
+        usuarioFacade = new UsuarioFacade();        
+        bemFacade = new BemFacade();
         
         configureComboNatureza(naturezas);
         configureComboFormaLance(formasLance);        
         
-        Collection<Usuario> usuarios = daoUsuario.getAllByType(EnumTipoUsuario.COMPRADOR);
+        Collection<Usuario> usuarios = usuarioFacade.buscarTodosPorTipo(EnumTipoUsuario.COMPRADOR);
         configureComboUsuarios(usuarios);
         
-        bensDisponiveis = daoBem.getAllFree();
+        bensDisponiveis = bemFacade.buscarTodosDisponiveis();
         configureListItensBens();
+        configureListItensLote();
     }
     
     private void configureComboNatureza(Collection<Natureza> naturezas) {
@@ -74,10 +74,10 @@ public class DialogCadastroLeilao extends javax.swing.JFrame {
                         Pair<Integer, String> item = (Pair<Integer, String>) e.getItem();
                         switch (item.getValue().toLowerCase()) {
                             case "oferta":
-                                usuarios = daoUsuario.getAllByType(EnumTipoUsuario.COMPRADOR);
+                                usuarios = usuarioFacade.buscarTodosPorTipo(EnumTipoUsuario.COMPRADOR);
                                 break;
                             case "demanda":
-                                usuarios = daoUsuario.getAllByType(EnumTipoUsuario.VENDEDOR);
+                                usuarios = usuarioFacade.buscarTodosPorTipo(EnumTipoUsuario.VENDEDOR);
                         }
                         
                         configureComboUsuarios(usuarios);
@@ -100,11 +100,19 @@ public class DialogCadastroLeilao extends javax.swing.JFrame {
     }
     
     private void configureListItensBens() {
-        DefaultListModel model = new DefaultListModel();
+        modelDisponiveis = new DefaultListModel();
         for (Bem item : bensDisponiveis) {
-            model.addElement(item.getDescricao());
+            modelDisponiveis.addElement(item);
         }
-        listBens.setModel(model);
+        listBens.setModel(modelDisponiveis);
+    }
+    
+    private void configureListItensLote() {
+        modelLote = new DefaultListModel();
+        for (Bem item : bensLote) {
+            modelLote.addElement(item);
+        }
+        listItensLote.setModel(modelLote);
     }
     
     @SuppressWarnings("unchecked")
@@ -187,8 +195,18 @@ public class DialogCadastroLeilao extends javax.swing.JFrame {
         jScrollPane2.setViewportView(listItensLote);
 
         btnAdicionarLote.setText("Adicionar");
+        btnAdicionarLote.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnAdicionarLoteActionPerformed(evt);
+            }
+        });
 
         btnRemoverLote.setText("Remover");
+        btnRemoverLote.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnRemoverLoteActionPerformed(evt);
+            }
+        });
 
         jLabel14.setText("<--------");
 
@@ -330,6 +348,24 @@ public class DialogCadastroLeilao extends javax.swing.JFrame {
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+    private void btnAdicionarLoteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAdicionarLoteActionPerformed
+        for(int i = 0; i < listBens.getModel().getSize(); i++){
+            if(((Bem)listBens.getModel().getElementAt(i)).getDescricao().equals(((Bem)listBens.getSelectedValue()).getDescricao())){
+                modelLote.addElement((Bem)listBens.getSelectedValue());
+                modelDisponiveis.removeElement((Bem)listBens.getSelectedValue());
+            }
+        }
+    }//GEN-LAST:event_btnAdicionarLoteActionPerformed
+
+    private void btnRemoverLoteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRemoverLoteActionPerformed
+        for(int i = 0; i < listItensLote.getModel().getSize(); i++){
+            if(((Bem)listItensLote.getModel().getElementAt(i)).getDescricao().equals(((Bem)listItensLote.getSelectedValue()).getDescricao())){
+                modelDisponiveis.addElement((Bem)listItensLote.getSelectedValue());
+                modelLote.removeElement((Bem)listItensLote.getSelectedValue());
+            }
+        }
+    }//GEN-LAST:event_btnRemoverLoteActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnAdicionarLote;

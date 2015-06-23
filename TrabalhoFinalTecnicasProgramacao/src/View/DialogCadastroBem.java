@@ -10,6 +10,7 @@ import Helpers.PopulateComponents;
 import Exception.BemException;
 import Exception.PersistenceException;
 import Facade.BemFacade;
+import Facade.CategoriaBemFacade;
 import Helpers.ComboboxHelper;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -26,8 +27,8 @@ public class DialogCadastroBem extends javax.swing.JFrame {
     private final MouseAdapter tableItemClick;
 
     public DialogCadastroBem() throws ConnectionException, PersistenceException {
-        IDAOCategoriaBem daoCategoriaBem = new DAOCategoriaBem();
-        Collection<CategoriaBem> categorias = daoCategoriaBem.getAll();
+        CategoriaBemFacade categoriaBemFacade = new CategoriaBemFacade();
+        Collection<CategoriaBem> categorias = categoriaBemFacade.buscarTodos();
         
         this.tableItemClick = new MouseAdapter() {
             @Override
