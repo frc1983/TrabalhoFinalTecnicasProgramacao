@@ -41,6 +41,9 @@ public class DialogCadastroLeilao extends javax.swing.JFrame {
     public DialogCadastroLeilao() throws ConnectionException, PersistenceException {
         initComponents();
         
+        listBens.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
+        listItensLote.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
+        
         naturezaFacade = new NaturezaFacade();
         Collection<Natureza> naturezas = naturezaFacade.buscarTodos();
         
