@@ -57,4 +57,9 @@ public class Bem {
     public void setCategoriaBem(CategoriaBem idcategoriabem) {
         this.categoriaBem = idcategoriabem;
     }
+    
+    @Override
+    public String toString(){
+        return this.descricao; 
+    }
 }
