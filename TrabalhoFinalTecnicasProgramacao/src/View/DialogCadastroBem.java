@@ -1,8 +1,6 @@
 package View;
 
 import Business.BemBusiness;
-import Dao.DAOCategoriaBem;
-import Dao.IDAOCategoriaBem;
 import Domain.Bem;
 import Domain.CategoriaBem;
 import Exception.ConnectionException;
@@ -186,7 +184,8 @@ public class DialogCadastroBem extends javax.swing.JFrame {
 
             BemBusiness.validaBem(bem);
 
-            if (facade.cadastrarBem(bem)) {
+            int idNovo = facade.cadastrarBem(bem);
+            if (idNovo > -1) {
                 refreshTable();
                 clearFields();
                 JOptionPane.showMessageDialog(rootPane, "O Bem foi cadastrado", null, JOptionPane.INFORMATION_MESSAGE);

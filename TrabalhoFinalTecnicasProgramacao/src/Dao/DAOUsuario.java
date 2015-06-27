@@ -1,7 +1,6 @@
 package Dao;
 
-import Connection.ConnectionFactory;
-import Connection.IConnection;
+import Connection.DBConnection;
 import Exception.ConnectionException;
 import Domain.TipoUsuario;
 import Domain.Usuario;
@@ -15,19 +14,20 @@ import java.util.Collection;
 
 public class DAOUsuario implements IDAOUsuario{
 
+    DBConnection dbConnection = new DBConnection();
+    
     @Override
     public Collection<Usuario> getAll() throws ConnectionException, PersistenceException {
         Collection<Usuario> usuarios = new ArrayList<>();
-        IConnection conn = null;
         Statement sta = null;
         ResultSet res = null;
 
         try {
-            conn = ConnectionFactory.getInstance();
+            dbConnection.open();
 
             String sql = "SELECT u.*, tu.ID as IdTIPO, tu.TIPO FROM Usuario u INNER JOIN TipoUsuario tu ON u.IdTipoUsuario = tu.Id";
 
-            sta = conn.getConnection().createStatement();
+            sta = dbConnection.getInstance().createStatement();
             res = sta.executeQuery(sql);
             while (res.next()) {
                 usuarios.add(new Usuario(
@@ -48,8 +48,8 @@ public class DAOUsuario implements IDAOUsuario{
                 if (sta != null && !sta.isClosed()) {
                     sta.close();
                 }
-                if (conn != null && !conn.getConnection().isClosed()) {
-                    conn.close();
+                if (dbConnection != null && dbConnection.isOpen()) {
+                    dbConnection.close();
                 }
             } catch (SQLException ex) {
                 throw new ConnectionException(ex.getCause());
@@ -61,20 +61,18 @@ public class DAOUsuario implements IDAOUsuario{
 
     @Override
     public boolean insert(Usuario usuario) throws ConnectionException, PersistenceException {
-
-        IConnection conn = null;
         PreparedStatement sta = null;
         ResultSet res = null;
 
         try {
-            conn = ConnectionFactory.getInstance();
+            dbConnection.open();
             String sql = "INSERT INTO Usuario (IDTIPOUSUARIO, NOME, CPFCNPJ, EMAIL) VALUES (?,?,?,?)";
 
             if (usuario.getId() != 0) {
                 sql = "UPDATE Usuario SET IDTIPOUSUARIO = ?, NOME = ?, CPFCNPJ = ?, EMAIL = ? WHERE ID = ?";
             }
 
-            sta = conn.getConnection().prepareStatement(sql);
+            sta = dbConnection.getInstance().prepareStatement(sql);
             sta.setInt(1, usuario.getTipoUsuario().getId());
             sta.setString(2, usuario.getNome());
             sta.setLong(3, Long.parseLong(usuario.getCpfCnpj()));
@@ -96,8 +94,8 @@ public class DAOUsuario implements IDAOUsuario{
                 if (sta != null && !sta.isClosed()) {
                     sta.close();
                 }
-                if (conn != null && !conn.getConnection().isClosed()) {
-                    conn.close();
+                if (dbConnection != null && dbConnection.isOpen()) {
+                    dbConnection.close();
                 }
             } catch (SQLException ex) {
                 throw new ConnectionException(ex.getCause());
@@ -107,18 +105,18 @@ public class DAOUsuario implements IDAOUsuario{
         return true;
     }
     
+    @Override
     public Collection<Usuario> getAllByType(int typeId) throws ConnectionException, PersistenceException {
         Collection<Usuario> usuarios = new ArrayList<>();
-        IConnection conn = null;
         PreparedStatement sta = null;
         ResultSet res = null;
 
         try {
-            conn = ConnectionFactory.getInstance();
+            dbConnection.open();
 
             String sql = "SELECT u.*, tu.ID as IdTIPO, tu.TIPO FROM Usuario u INNER JOIN TipoUsuario tu ON u.IdTipoUsuario = tu.Id WHERE u.idtipoUsuario = ?";
 
-            sta = conn.getConnection().prepareStatement(sql);
+            sta = dbConnection.getInstance().prepareStatement(sql);
             sta.setInt(1, typeId);
             res = sta.executeQuery();
             while (res.next()) {
@@ -140,8 +138,8 @@ public class DAOUsuario implements IDAOUsuario{
                 if (sta != null && !sta.isClosed()) {
                     sta.close();
                 }
-                if (conn != null && !conn.getConnection().isClosed()) {
-                    conn.close();
+                if (dbConnection != null && dbConnection.isOpen()) {
+                    dbConnection.close();
                 }
             } catch (SQLException ex) {
                 throw new ConnectionException(ex.getCause());
@@ -149,5 +147,49 @@ public class DAOUsuario implements IDAOUsuario{
         }
 
         return usuarios;
+    }
+    
+    @Override
+    public Usuario getById(int id) throws ConnectionException, PersistenceException {
+        Usuario usuario = null;
+        PreparedStatement sta = null;
+        ResultSet res = null;
+
+        try {
+            dbConnection.open();
+
+            String sql = "SELECT u.*, tu.ID as IdTIPO, tu.TIPO FROM Usuario u INNER JOIN TipoUsuario tu ON u.IdTipoUsuario = tu.Id WHERE u.id = ?";
+
+            sta = dbConnection.getInstance().prepareStatement(sql);
+            sta.setInt(1, id);
+            res = sta.executeQuery();
+            while (res.next()) {
+                usuario = new Usuario(
+                        res.getInt("ID"),
+                        res.getString("NOME"),
+                        res.getString("CPFCNPJ"),
+                        res.getString("EMAIL"),
+                        new TipoUsuario(res.getInt("IdTIPO"), res.getString("TIPO"))
+                );
+            }
+        } catch (ConnectionException | SQLException ex) {
+            throw new PersistenceException("Erro ao consultar Usuários.", ex.getCause());
+        } finally {
+            try {
+                if (res != null && !res.isClosed()) {
+                    res.close();
+                }
+                if (sta != null && !sta.isClosed()) {
+                    sta.close();
+                }
+                if (dbConnection != null && dbConnection.isOpen()) {
+                    dbConnection.close();
+                }
+            } catch (SQLException ex) {
+                throw new ConnectionException(ex.getCause());
+            }
+        }
+
+        return usuario;
     }
 }

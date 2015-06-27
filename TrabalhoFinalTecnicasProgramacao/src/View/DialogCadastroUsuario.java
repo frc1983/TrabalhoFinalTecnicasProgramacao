@@ -1,8 +1,6 @@
 package View;
 
 import Business.UsuarioBusiness;
-import Dao.DAOTipoUsuario;
-import Dao.IDAOTipoUsuario;
 import Exception.ConnectionException;
 import Exception.UsuarioException;
 import Facade.UsuarioFacade;
@@ -10,12 +8,11 @@ import Helpers.PopulateComponents;
 import Domain.TipoUsuario;
 import Domain.Usuario;
 import Exception.PersistenceException;
+import Facade.TipoUsuarioFacade;
 import Helpers.ComboboxHelper;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.Collection;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javafx.util.Pair;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JOptionPane;
@@ -28,8 +25,8 @@ public class DialogCadastroUsuario extends javax.swing.JFrame {
     private final MouseAdapter tableItemClick;
 
     DialogCadastroUsuario() throws ConnectionException, PersistenceException {
-        IDAOTipoUsuario daoTipoUsuario = new DAOTipoUsuario();
-        Collection<TipoUsuario> tiposUsuario = daoTipoUsuario.getAll();
+        TipoUsuarioFacade tipoUsuarioFacade = new TipoUsuarioFacade();
+        Collection<TipoUsuario> tiposUsuario = tipoUsuarioFacade.buscarTodos();
         
         this.tableItemClick = new MouseAdapter() {
             @Override
@@ -199,10 +196,8 @@ public class DialogCadastroUsuario extends javax.swing.JFrame {
                 clearFields();
                 JOptionPane.showMessageDialog(rootPane, "Usuário cadastrado", null, JOptionPane.INFORMATION_MESSAGE);
             }
-        } catch (ConnectionException | UsuarioException ex) {
+        } catch (ConnectionException | PersistenceException | UsuarioException ex) {
             JOptionPane.showMessageDialog(rootPane, ex.getMessage(), "ERRO", JOptionPane.ERROR_MESSAGE);
-        } catch (PersistenceException ex) {
-            Logger.getLogger(DialogCadastroUsuario.class.getName()).log(Level.SEVERE, null, ex);
         }
     }//GEN-LAST:event_btnSalvarActionPerformed
 
@@ -215,7 +210,7 @@ public class DialogCadastroUsuario extends javax.swing.JFrame {
         model.setRowCount(0);
         for (Usuario usuario : new UsuarioFacade().buscarTodos()) {
             if (usuario.getCpfCnpj().length() < 12) {
-                usuario.setCpfCnpj(String.format("%011d", Integer.parseInt(usuario.getCpfCnpj())));
+                usuario.setCpfCnpj(String.format("%011d", Long.parseLong(usuario.getCpfCnpj())));
             } else if (usuario.getCpfCnpj().length() > 13) {
                 usuario.setCpfCnpj(String.format("%014d", Long.parseLong(usuario.getCpfCnpj())));
             }

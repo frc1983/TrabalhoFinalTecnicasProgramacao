@@ -7,6 +7,7 @@ import java.util.Collection;
 
 public interface IDAOBem{
     Collection<Bem> getAll() throws ConnectionException, PersistenceException;
-    boolean insert(Bem entity) throws ConnectionException, PersistenceException;
+    int insert(Bem entity) throws ConnectionException, PersistenceException;
     Collection<Bem> getAllFree() throws ConnectionException, PersistenceException;
+    Collection<Bem> getAllById(int idBem) throws PersistenceException, ConnectionException;
 }

@@ -8,4 +8,5 @@ import java.util.Collection;
 public interface IDAOFormaLance {
 
     Collection<FormaLance> getAll() throws ConnectionException, PersistenceException;
+    FormaLance getById(int id) throws ConnectionException, PersistenceException;
 }

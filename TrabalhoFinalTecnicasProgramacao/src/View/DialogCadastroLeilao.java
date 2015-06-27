@@ -1,73 +1,90 @@
 package View;
 
+import Business.LeilaoBusiness;
+import Business.LoteBusiness;
 import Domain.Bem;
 import Domain.FormaLance;
+import Domain.Leilao;
+import Domain.Lote;
 import Domain.Natureza;
 import Domain.Usuario;
 import Enumerators.EnumTipoUsuario;
 import Exception.ConnectionException;
+import Exception.LeilaoException;
+import Exception.LoteException;
 import Exception.PersistenceException;
 import Facade.BemFacade;
 import Facade.FormaLanceFacade;
+import Facade.LeilaoFacade;
 import Facade.NaturezaFacade;
 import Facade.UsuarioFacade;
 import Helpers.PopulateComponents;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.math.BigDecimal;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
-import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.util.Pair;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListModel;
-import javax.swing.ListModel;
+import javax.swing.JFormattedTextField;
+import javax.swing.JOptionPane;
+import javax.swing.ListSelectionModel;
+import javax.swing.text.MaskFormatter;
 
 public class DialogCadastroLeilao extends javax.swing.JFrame {
-    
     NaturezaFacade naturezaFacade;
     FormaLanceFacade formaLanceFacade;
     UsuarioFacade usuarioFacade;
     BemFacade bemFacade;
-    
+
     Collection<Bem> bensLote = new ArrayList<>();
     Collection<Bem> bensDisponiveis = new ArrayList<>();
-    
+
     DefaultListModel modelLote;
     DefaultListModel modelDisponiveis;
-    
+
     public DialogCadastroLeilao() throws ConnectionException, PersistenceException {
         initComponents();
-        
+
+        //txtDataInicio.addFocusListener(focusListenerData);
+        //txtDataTermino.addFocusListener(focusListenerData);
+        //txtHoraInicio.addFocusListener(focusListenerHora);
+        //txtHoraTermino.addFocusListener(focusListenerHora);        
         listBens.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
         listItensLote.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
-        
+
         naturezaFacade = new NaturezaFacade();
         Collection<Natureza> naturezas = naturezaFacade.buscarTodos();
-        
+
         formaLanceFacade = new FormaLanceFacade();
         Collection<FormaLance> formasLance = formaLanceFacade.buscarTodos();
-        
-        usuarioFacade = new UsuarioFacade();        
+
+        usuarioFacade = new UsuarioFacade();
         bemFacade = new BemFacade();
-        
+
         configureComboNatureza(naturezas);
-        configureComboFormaLance(formasLance);        
-        
+        configureComboFormaLance(formasLance);
+
         Collection<Usuario> usuarios = usuarioFacade.buscarTodosPorTipo(EnumTipoUsuario.COMPRADOR);
         configureComboUsuarios(usuarios);
-        
+
         bensDisponiveis = bemFacade.buscarTodosDisponiveis();
         configureListItensBens();
         configureListItensLote();
     }
-    
+
     private void configureComboNatureza(Collection<Natureza> naturezas) {
         DefaultComboBoxModel mod = new DefaultComboBoxModel(PopulateComponents.populateComboNatureza(naturezas).toArray());
         cmbNatureza.setModel(mod);
-        
+
         cmbNatureza.addItemListener(new ItemListener() {
             @Override
             public void itemStateChanged(ItemEvent e) {
@@ -82,7 +99,7 @@ public class DialogCadastroLeilao extends javax.swing.JFrame {
                             case "demanda":
                                 usuarios = usuarioFacade.buscarTodosPorTipo(EnumTipoUsuario.VENDEDOR);
                         }
-                        
+
                         configureComboUsuarios(usuarios);
                     } catch (ConnectionException | PersistenceException ex) {
                         Logger.getLogger(DialogCadastroLeilao.class.getName()).log(Level.SEVERE, null, ex);
@@ -91,17 +108,17 @@ public class DialogCadastroLeilao extends javax.swing.JFrame {
             }
         });
     }
-    
+
     private void configureComboFormaLance(Collection<FormaLance> formasLance) {
         DefaultComboBoxModel mod = new DefaultComboBoxModel(PopulateComponents.populateComboFormaLance(formasLance).toArray());
         cmbFormaLance.setModel(mod);
     }
-    
+
     private void configureComboUsuarios(Collection<Usuario> usuarios) {
         DefaultComboBoxModel mod = new DefaultComboBoxModel(PopulateComponents.populateComboUsuarios(usuarios).toArray());
         cmbUsuario.setModel(mod);
     }
-    
+
     private void configureListItensBens() {
         modelDisponiveis = new DefaultListModel();
         for (Bem item : bensDisponiveis) {
@@ -109,7 +126,7 @@ public class DialogCadastroLeilao extends javax.swing.JFrame {
         }
         listBens.setModel(modelDisponiveis);
     }
-    
+
     private void configureListItensLote() {
         modelLote = new DefaultListModel();
         for (Bem item : bensLote) {
@@ -117,7 +134,64 @@ public class DialogCadastroLeilao extends javax.swing.JFrame {
         }
         listItensLote.setModel(modelLote);
     }
+
+    private final FocusListener focusListenerData = new FocusListener() {
+        @Override
+        public void focusGained(FocusEvent e) {
+            JFormattedTextField input = (JFormattedTextField) e.getSource();
+            if (input.getText().equals("")) {
+                applyMask("##/##/####", input);
+            }
+        }
+
+        @Override
+        public void focusLost(FocusEvent e) {
+            JFormattedTextField input = (JFormattedTextField) e.getSource();
+            if (input.getText().equals("")) {
+                input.setText("");
+            }
+        }
+    };
+
+    private final FocusListener focusListenerHora = new FocusListener() {
+        @Override
+        public void focusGained(FocusEvent e) {
+            JFormattedTextField input = (JFormattedTextField) e.getSource();
+            if (input.getText().equals("")) {
+                applyMask("##:##", input);
+            }
+        }
+
+        @Override
+        public void focusLost(FocusEvent e) {
+            JFormattedTextField input = (JFormattedTextField) e.getSource();
+            if (input.getText().equals("")) {
+                input.setText("");
+            }
+        }
+    };
+
+    private void applyMask(String mask, JFormattedTextField input) {
+        MaskFormatter dateMask;
+        try {
+            dateMask = new MaskFormatter(mask);
+            dateMask.install(input);
+        } catch (ParseException ex) {
+            Logger.getLogger(DialogCadastroLeilao.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
     
+    private void clearFields(){
+        cmbNatureza.setSelectedIndex(0);
+        cmbFormaLance.setSelectedIndex(0);
+        cmbUsuario.setSelectedIndex(0);
+        txtDataInicio.setText("");
+        txtDataTermino.setText("");
+        txtHoraInicio.setText("");
+        txtHoraTermino.setText("");
+        txtPreco.setText("");
+    }
+
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
@@ -175,19 +249,25 @@ public class DialogCadastroLeilao extends javax.swing.JFrame {
 
         cmbUsuario.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
 
-        txtPreco.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(java.text.NumberFormat.getCurrencyInstance())));
+        txtPreco.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#,##0.00"))));
+        txtPreco.setText("1234,99");
 
         jLabel8.setText("Hora de Início:");
 
-        txtDataInicio.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.DateFormatter()));
+        txtDataInicio.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.DateFormatter(new java.text.SimpleDateFormat("yyyy-MM-dd"))));
+        txtDataInicio.setText("2014-12-10");
+        txtDataInicio.setToolTipText("");
 
-        txtHoraInicio.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.DateFormatter(java.text.DateFormat.getTimeInstance())));
+        txtHoraInicio.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.DateFormatter(java.text.DateFormat.getTimeInstance(java.text.DateFormat.SHORT))));
+        txtHoraInicio.setText("13:00");
 
-        txtDataTermino.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.DateFormatter()));
+        txtDataTermino.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.DateFormatter(new java.text.SimpleDateFormat("yyy-MM-dd"))));
+        txtDataTermino.setText("2014-12-10");
 
         jLabel9.setText("Hora do Término:");
 
-        txtHoraTermino.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.DateFormatter(java.text.DateFormat.getTimeInstance())));
+        txtHoraTermino.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.DateFormatter(java.text.DateFormat.getTimeInstance(java.text.DateFormat.SHORT))));
+        txtHoraTermino.setText("14:00");
 
         jSeparator1.setOrientation(javax.swing.SwingConstants.VERTICAL);
 
@@ -218,6 +298,11 @@ public class DialogCadastroLeilao extends javax.swing.JFrame {
         jScrollPane3.setViewportView(listBens);
 
         btnSalvarLeilao.setText("Salvar Leilão");
+        btnSalvarLeilao.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnSalvarLeilaoActionPerformed(evt);
+            }
+        });
 
         jLabel16.setText("Bens Disponíveis:");
 
@@ -353,22 +438,70 @@ public class DialogCadastroLeilao extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnAdicionarLoteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAdicionarLoteActionPerformed
-        for(int i = 0; i < listBens.getModel().getSize(); i++){
-            if(((Bem)listBens.getModel().getElementAt(i)).getDescricao().equals(((Bem)listBens.getSelectedValue()).getDescricao())){
-                modelLote.addElement((Bem)listBens.getSelectedValue());
-                modelDisponiveis.removeElement((Bem)listBens.getSelectedValue());
+        for (int i = 0; i < listBens.getModel().getSize(); i++) {
+            if (((Bem) listBens.getModel().getElementAt(i)).getDescricao().equals(((Bem) listBens.getSelectedValue()).getDescricao())) {
+                modelLote.addElement((Bem) listBens.getSelectedValue());
+                modelDisponiveis.removeElement((Bem) listBens.getSelectedValue());
             }
         }
     }//GEN-LAST:event_btnAdicionarLoteActionPerformed
 
     private void btnRemoverLoteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRemoverLoteActionPerformed
-        for(int i = 0; i < listItensLote.getModel().getSize(); i++){
-            if(((Bem)listItensLote.getModel().getElementAt(i)).getDescricao().equals(((Bem)listItensLote.getSelectedValue()).getDescricao())){
-                modelDisponiveis.addElement((Bem)listItensLote.getSelectedValue());
-                modelLote.removeElement((Bem)listItensLote.getSelectedValue());
+        for (int i = 0; i < listItensLote.getModel().getSize(); i++) {
+            if (((Bem) listItensLote.getModel().getElementAt(i)).getDescricao().equals(((Bem) listItensLote.getSelectedValue()).getDescricao())) {
+                modelDisponiveis.addElement((Bem) listItensLote.getSelectedValue());
+                modelLote.removeElement((Bem) listItensLote.getSelectedValue());
             }
         }
     }//GEN-LAST:event_btnRemoverLoteActionPerformed
+
+    private void btnSalvarLeilaoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSalvarLeilaoActionPerformed
+        try {
+            LeilaoFacade facade = new LeilaoFacade();
+
+            Pair<Integer, String> selectedNatureza = (Pair<Integer, String>) cmbNatureza.getSelectedItem();
+            Pair<Integer, String> selectedFormaLance = (Pair<Integer, String>) cmbFormaLance.getSelectedItem();
+            Pair<Integer, String> selectedUsuarioResponsavel = (Pair<Integer, String>) cmbUsuario.getSelectedItem();
+
+            java.sql.Date dataInicio = java.sql.Date.valueOf(txtDataInicio.getText());
+            java.sql.Date dataTermino = java.sql.Date.valueOf(txtDataTermino.getText());
+
+            DateFormat formatter = new SimpleDateFormat("HH:mm");
+            java.sql.Time horaInicio = new java.sql.Time(formatter.parse(txtHoraInicio.getText()).getTime());
+            java.sql.Time horaTermino = new java.sql.Time(formatter.parse(txtHoraTermino.getText()).getTime());
+
+            Natureza natureza = new Natureza(selectedNatureza.getKey(), selectedNatureza.getValue());
+            FormaLance formaLance = new FormaLance(selectedFormaLance.getKey(), selectedFormaLance.getValue());
+            Usuario usuarioResponsavel = usuarioFacade.buscarPorId(selectedUsuarioResponsavel.getKey());
+
+            Collection<Bem> bens = new ArrayList<>();
+            for (int i = 0; i < listItensLote.getModel().getSize(); i++) {
+                Bem item = (Bem) listItensLote.getModel().getElementAt(i);
+                bens.add(item);
+            }
+
+            BigDecimal preco;
+            if ("".equals(txtPreco.getText())) {
+                preco = new BigDecimal(0);
+            } else {
+                preco = BigDecimal.valueOf(Double.parseDouble(txtPreco.getText().replace(".", "").replace(',', '.')));
+            }
+            Lote lote = new Lote(0, new ArrayList<>(), bens, preco);
+            LoteBusiness.validaLote(lote);
+
+            Leilao leilao = new Leilao(0, usuarioResponsavel, formaLance, lote, natureza, dataInicio, dataTermino, horaInicio, horaTermino);
+            LeilaoBusiness.validaLeilao(leilao);
+
+            if (facade.cadastrarLeilao(leilao)) {
+                JOptionPane.showMessageDialog(rootPane, "Leilão cadastrado", null, JOptionPane.INFORMATION_MESSAGE);
+                clearFields();
+            }
+        } catch (ConnectionException | PersistenceException | LoteException | LeilaoException ex) {
+            JOptionPane.showMessageDialog(rootPane, ex.getMessage(), "ERRO", JOptionPane.ERROR_MESSAGE);
+        } catch (ParseException ex) {
+            Logger.getLogger(DialogCadastroLeilao.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }//GEN-LAST:event_btnSalvarLeilaoActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnAdicionarLote;

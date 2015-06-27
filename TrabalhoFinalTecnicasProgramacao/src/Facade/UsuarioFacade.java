@@ -21,6 +21,10 @@ public class UsuarioFacade {
         return daoUsuario.getAllByType(tipo);
     }
     
+    public Usuario buscarPorId(int id) throws ConnectionException, PersistenceException{
+        return daoUsuario.getById(id);
+    }
+    
     public boolean cadastrarUsuario(Usuario usuario) throws ConnectionException, PersistenceException{
         return daoUsuario.insert(usuario);
     }

@@ -21,7 +21,7 @@ public class BemFacade {
         return daoBem.getAllFree();
     }
     
-    public boolean cadastrarBem(Bem bem) throws ConnectionException{
+    public int cadastrarBem(Bem bem) throws ConnectionException{
         return daoBem.insert(bem);
     }
 }

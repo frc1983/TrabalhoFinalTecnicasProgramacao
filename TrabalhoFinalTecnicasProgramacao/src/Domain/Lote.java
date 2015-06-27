@@ -14,8 +14,11 @@ public class Lote {
     public Lote() {
     }
 
-    public Lote(Integer id) {
+    public Lote(Integer id, Collection<Lance> lances, Collection<Bem> bens, BigDecimal preco) {
         this.id = id;
+        this.lances = lances;
+        this.bens = bens;
+        this.preco = preco;
     }
     
     public Integer getId() {

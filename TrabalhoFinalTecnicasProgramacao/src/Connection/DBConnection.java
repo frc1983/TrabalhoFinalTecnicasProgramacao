@@ -10,10 +10,12 @@ public class DBConnection implements IConnection {
     private Connection connection;
     private static final String USER = "usuario";
     private static final String PASS = "senha";
+    
+    public Connection getInstance() throws ConnectionException{
+        return connection;
+    }
 
-    private Connection createConnection() throws ConnectionException {
-        Connection connection = null;
-        
+    private Connection createConnection() throws ConnectionException {        
         try {
             Class.forName("org.apache.derby.jdbc.ClientDriver").newInstance();
             connection = DriverManager.getConnection("jdbc:derby://localhost:1527/TrabalhoFinal", USER, PASS);
@@ -51,6 +53,7 @@ public class DBConnection implements IConnection {
         if (connection != null) {
             try {
                 connection.close();
+                connection = null;
             } catch (SQLException e) {
                 throw new ConnectionException(e);
             }
@@ -96,6 +99,14 @@ public class DBConnection implements IConnection {
             if (hasTransaction()) {
                 connection.rollback();
             }
+        } catch (SQLException e) {
+            throw new ConnectionException(e);
+        }
+    }
+
+    public boolean isOpen() throws ConnectionException {
+        try {
+            return !connection.isClosed();
         } catch (SQLException e) {
             throw new ConnectionException(e);
         }

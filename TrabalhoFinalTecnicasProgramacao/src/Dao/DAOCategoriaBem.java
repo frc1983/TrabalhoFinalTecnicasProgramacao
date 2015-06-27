@@ -1,7 +1,6 @@
 package Dao;
 
-import Connection.ConnectionFactory;
-import Connection.IConnection;
+import Connection.DBConnection;
 import Domain.CategoriaBem;
 import Exception.ConnectionException;
 import Exception.PersistenceException;
@@ -13,19 +12,20 @@ import java.util.Collection;
 
 public class DAOCategoriaBem implements IDAOCategoriaBem {
     
+    DBConnection dbConnection = new DBConnection();
+    
     @Override
     public Collection<CategoriaBem> getAll() throws ConnectionException, PersistenceException{
         Collection<CategoriaBem> categorias = new ArrayList<>();
-        IConnection conn = null;
         Statement sta = null;
         ResultSet res = null;
         
         try {
-            conn = ConnectionFactory.getInstance();
+            dbConnection.open();
             
             String sql = "SELECT * FROM CategoriaBem";
             
-            sta = conn.getConnection().createStatement();            
+            sta = dbConnection.getInstance().createStatement();            
             res = sta.executeQuery(sql);
             while (res.next()) {
                 categorias.add(new CategoriaBem(
@@ -33,7 +33,7 @@ public class DAOCategoriaBem implements IDAOCategoriaBem {
                         res.getString("CATEGORIA"))
                 );
             }
-        } catch (Exception ex) {
+        } catch (ConnectionException | SQLException ex) {
             throw new PersistenceException("Erro ao consultar Tipos de usuários.", ex.getCause());
         }
         finally {
@@ -42,8 +42,9 @@ public class DAOCategoriaBem implements IDAOCategoriaBem {
                     res.close();
                 if(sta != null && !sta.isClosed())
                     sta.close();
-                if(conn != null && !conn.getConnection().isClosed())
-                    conn.close();
+                if (dbConnection != null && dbConnection.isOpen()) {
+                    dbConnection.close();
+                }
             } catch (SQLException ex) {
                 throw new ConnectionException(ex.getCause());
             }
