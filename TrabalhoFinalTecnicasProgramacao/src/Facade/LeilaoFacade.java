@@ -13,6 +13,10 @@ public class LeilaoFacade {
         daoLeilao = new DAOLeilao();
     }
     
+    public Leilao buscarPorId(int id) throws ConnectionException, PersistenceException{
+        return daoLeilao.getById(id);
+    }
+    
     public Collection<Leilao> buscarTodosPorTipo(int status) throws ConnectionException, PersistenceException{
         return daoLeilao.getAllByStatus(status);
     }

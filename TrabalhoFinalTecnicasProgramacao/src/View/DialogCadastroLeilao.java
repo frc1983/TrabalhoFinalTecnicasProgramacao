@@ -29,8 +29,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javafx.util.Pair;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListModel;
@@ -102,7 +100,7 @@ public class DialogCadastroLeilao extends javax.swing.JFrame {
 
                         configureComboUsuarios(usuarios);
                     } catch (ConnectionException | PersistenceException ex) {
-                        Logger.getLogger(DialogCadastroLeilao.class.getName()).log(Level.SEVERE, null, ex);
+                        JOptionPane.showMessageDialog(rootPane, ex.getMessage(), "ERRO", JOptionPane.ERROR_MESSAGE);
                     }
                 }
             }
@@ -177,7 +175,7 @@ public class DialogCadastroLeilao extends javax.swing.JFrame {
             dateMask = new MaskFormatter(mask);
             dateMask.install(input);
         } catch (ParseException ex) {
-            Logger.getLogger(DialogCadastroLeilao.class.getName()).log(Level.SEVERE, null, ex);
+            JOptionPane.showMessageDialog(rootPane, ex.getMessage(), "ERRO", JOptionPane.ERROR_MESSAGE);
         }
     }
     
@@ -496,10 +494,8 @@ public class DialogCadastroLeilao extends javax.swing.JFrame {
                 JOptionPane.showMessageDialog(rootPane, "Leilão cadastrado", null, JOptionPane.INFORMATION_MESSAGE);
                 clearFields();
             }
-        } catch (ConnectionException | PersistenceException | LoteException | LeilaoException ex) {
+        } catch (ConnectionException | PersistenceException | LoteException | LeilaoException | ParseException ex) {
             JOptionPane.showMessageDialog(rootPane, ex.getMessage(), "ERRO", JOptionPane.ERROR_MESSAGE);
-        } catch (ParseException ex) {
-            Logger.getLogger(DialogCadastroLeilao.class.getName()).log(Level.SEVERE, null, ex);
         }
     }//GEN-LAST:event_btnSalvarLeilaoActionPerformed
 

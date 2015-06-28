@@ -1,21 +1,29 @@
 package Domain;
 
 import java.math.BigDecimal;
-import java.util.Date;
+import java.sql.Time;
+import java.sql.Date;
+import java.text.NumberFormat;
 
 public class Lance {
-    
+
     private Integer id;
-    private Date datahora;
+    private Date data;
+    private Time hora;
     private BigDecimal valor;
-    private Lote idlote;    
-    private Usuario idusuario;
+    private Lote lote;
+    private Usuario usuario;
 
     public Lance() {
     }
 
-    public Lance(Integer id) {
+    public Lance(Integer id, Date data, Time hora, BigDecimal valor, Lote lote, Usuario usuario) {
         this.id = id;
+        this.data = data;
+        this.hora = hora;
+        this.valor = valor;
+        this.lote = lote;
+        this.usuario = usuario;
     }
 
     public Integer getId() {
@@ -26,12 +34,12 @@ public class Lance {
         this.id = id;
     }
 
-    public Date getDatahora() {
-        return datahora;
+    public Date getData() {
+        return data;
     }
 
-    public void setDatahora(Date datahora) {
-        this.datahora = datahora;
+    public void setData(Date datahora) {
+        this.data = datahora;
     }
 
     public BigDecimal getValor() {
@@ -42,19 +50,33 @@ public class Lance {
         this.valor = valor;
     }
 
-    public Lote getIdlote() {
-        return idlote;
+    public Lote getLote() {
+        return lote;
     }
 
-    public void setIdlote(Lote idlote) {
-        this.idlote = idlote;
+    public void setLote(Lote idlote) {
+        this.lote = idlote;
     }
 
-    public Usuario getIdusuario() {
-        return idusuario;
+    public Usuario getUsuario() {
+        return usuario;
     }
 
-    public void setIdusuario(Usuario idusuario) {
-        this.idusuario = idusuario;
+    public void setUsuario(Usuario usuario) {
+        this.usuario = usuario;
+    }
+
+    public Time getHora() {
+        return hora;
+    }
+
+    public void setHora(Time hora) {
+        this.hora = hora;
+    }
+
+    @Override
+    public String toString() {
+        NumberFormat formatter = NumberFormat.getCurrencyInstance();
+        return formatter.format(this.valor);
     }
 }

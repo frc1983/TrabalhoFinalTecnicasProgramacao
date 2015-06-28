@@ -24,4 +24,8 @@ public class BemFacade {
     public int cadastrarBem(Bem bem) throws ConnectionException{
         return daoBem.insert(bem);
     }
+
+    public Collection<Bem> buscarTodosPorLote(int id) throws PersistenceException, ConnectionException {
+        return daoBem.getAllByLot(id);
+    }
 }

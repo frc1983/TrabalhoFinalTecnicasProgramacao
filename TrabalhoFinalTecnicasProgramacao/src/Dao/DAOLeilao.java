@@ -120,4 +120,52 @@ public class DAOLeilao implements IDAOLeilao {
 
         return leiloes;
     }
+
+    @Override
+    public Leilao getById(int id) throws PersistenceException, ConnectionException {
+        Leilao leilao = null;
+        PreparedStatement sta = null;
+        ResultSet res = null;
+
+        try {
+            dbConnection.open();
+
+            String sql = "SELECT * FROM LEILAO WHERE id = ?";
+
+            sta = dbConnection.getInstance().prepareStatement(sql);
+            sta.setInt(1, id);
+            res = sta.executeQuery();
+            while (res.next()) {
+                leilao = new Leilao(
+                        res.getInt("ID"),
+                        new DAOUsuario().getById(res.getInt("IDUSUARIO")),
+                        new DAOFormaLance().getById(res.getInt("IDFORMALANCE")),
+                        new DAOLote().getById(res.getInt("IDLOTE")),
+                        new DAONatureza().getById(res.getInt("IDNATUREZA")),
+                        res.getDate("DATAINICIO"),
+                        res.getDate("DATATERMINO"),
+                        res.getTime("HORAINICIO"),
+                        res.getTime("HORATERMINO")
+                );
+            }
+            
+            return leilao;
+        } catch (ConnectionException | SQLException ex) {
+            throw new PersistenceException("Erro ao consultar Lote.", ex.getCause());
+        } finally {
+            try {
+                if (res != null && !res.isClosed()) {
+                    res.close();
+                }
+                if (sta != null && !sta.isClosed()) {
+                    sta.close();
+                }
+                if (dbConnection != null && dbConnection.isOpen()) {
+                    dbConnection.close();
+                }
+            } catch (SQLException ex) {
+                throw new ConnectionException(ex.getCause());
+            }
+        }
+    }
 }

@@ -216,7 +216,6 @@ public class DialogCadastroUsuario extends javax.swing.JFrame {
             }
             model.addRow(new Object[]{usuario.getId(), usuario.getNome(), usuario.getCpfCnpj(), usuario.getEmail(), usuario.getTipoUsuario().getTipo()});
         }
-
     }
 
     private void clearFields() {

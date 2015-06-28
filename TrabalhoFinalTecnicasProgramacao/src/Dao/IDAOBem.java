@@ -10,4 +10,5 @@ public interface IDAOBem{
     int insert(Bem entity) throws ConnectionException, PersistenceException;
     Collection<Bem> getAllFree() throws ConnectionException, PersistenceException;
     Collection<Bem> getAllById(int idBem) throws PersistenceException, ConnectionException;
+    Collection<Bem> getAllByLot(int id) throws PersistenceException, ConnectionException;
 }

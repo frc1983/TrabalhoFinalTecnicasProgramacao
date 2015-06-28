@@ -1,15 +1,128 @@
 package View;
 
+import Domain.Lance;
+import Domain.Leilao;
+import Enumerators.EnumStatusLeilao;
 import Exception.ConnectionException;
 import Exception.PersistenceException;
+import Facade.LanceFacade;
+import Facade.LeilaoFacade;
+import Facade.UsuarioFacade;
+import java.awt.event.ActionEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
+import javax.swing.Timer;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableModel;
 
 public class Principal extends javax.swing.JFrame {
+
+    LeilaoFacade leilaoFacade;
+    LanceFacade lanceFacade;
+    UsuarioFacade usuarioFacade;
+
+    private final MouseAdapter tableFinalizadosClick;
+    private final MouseAdapter tableAndamentoClick;
+
+    private final Timer timerTask;
 
     public Principal() {
         initComponents();
         this.setExtendedState(JFrame.MAXIMIZED_BOTH);
+
+        this.tableFinalizadosClick = new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                try {
+                    int rowIndex = tableFinalizados.rowAtPoint(e.getPoint());
+                    TableModel model = tableFinalizados.getModel();
+                    DialogLance dialogLance = new DialogLance(Integer.parseInt(model.getValueAt(rowIndex, 0).toString()), EnumStatusLeilao.TERMINADO);
+                    dialogLance.setVisible(true);
+                } catch (ConnectionException | PersistenceException ex) {
+                    JOptionPane.showMessageDialog(rootPane, ex.getMessage(), "ERRO", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        };
+
+        this.tableAndamentoClick = new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                try {
+                    int rowIndex = tableAndamento.rowAtPoint(e.getPoint());
+                    TableModel model = tableAndamento.getModel();
+                    DialogLance dialogLance = new DialogLance(Integer.parseInt(model.getValueAt(rowIndex, 0).toString()), EnumStatusLeilao.ATIVO);
+                    dialogLance.setVisible(true);
+                } catch (ConnectionException | PersistenceException ex) {
+                    JOptionPane.showMessageDialog(rootPane, ex.getMessage(), "ERRO", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        };
+
+        leilaoFacade = new LeilaoFacade();
+        lanceFacade = new LanceFacade();
+        usuarioFacade = new UsuarioFacade();
+
+        timerTask = new Timer(0, (ActionEvent e) -> {
+            refreshTableAndamento();
+            refreshTableFinalizados();
+        });
+        timerTask.setDelay(10000);
+        timerTask.start();
+
+        tableAndamento.addMouseListener(tableAndamentoClick);
+        tableFinalizados.addMouseListener(tableFinalizadosClick);
+    }
+
+    private void refreshTableFinalizados() {
+        DefaultTableModel model = (DefaultTableModel) tableFinalizados.getModel();
+        model.setRowCount(0);
+        try {
+            for (Leilao leilao : leilaoFacade.buscarTodosPorTipo(EnumStatusLeilao.TERMINADO)) {
+                Lance melhor = lanceFacade.buscarMaiorPorLote(leilao.getLote().getId());
+                if (melhor != null) {
+                    model.addRow(new Object[]{
+                        leilao.getId(),
+                        leilao.getLote().getPreco(),
+                        usuarioFacade.buscarPorId(melhor.getUsuario().getId()).getNome(),
+                        melhor.getValor(),
+                        melhor.getData() + " " + melhor.getHora()
+                    });
+                }
+            }
+        } catch (ConnectionException | PersistenceException ex) {
+            JOptionPane.showMessageDialog(rootPane, ex.getMessage(), "ERRO", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void refreshTableAndamento() {
+        DefaultTableModel model = (DefaultTableModel) tableAndamento.getModel();
+        model.setRowCount(0);
+        try {
+            for (Leilao leilao : leilaoFacade.buscarTodosPorTipo(EnumStatusLeilao.ATIVO)) {
+                Lance melhor = lanceFacade.buscarMaiorPorLote(leilao.getLote().getId());
+                if (melhor != null) {
+                    model.addRow(new Object[]{
+                        leilao.getId(),
+                        leilao.getLote().getPreco(),
+                        usuarioFacade.buscarPorId(melhor.getUsuario().getId()).getNome(),
+                        melhor.getValor(),
+                        melhor.getData() + " " + melhor.getHora()
+                    });
+                } else {
+                    model.addRow(new Object[]{
+                        leilao.getId(),
+                        leilao.getLote().getPreco(),
+                        " - ",
+                        " - ",
+                        " - "
+                    });
+                }
+            }
+        } catch (ConnectionException | PersistenceException ex) {
+            JOptionPane.showMessageDialog(rootPane, ex.getMessage(), "ERRO", JOptionPane.ERROR_MESSAGE);
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -19,9 +132,9 @@ public class Principal extends javax.swing.JFrame {
         jMenuItem1 = new javax.swing.JMenuItem();
         jLabel1 = new javax.swing.JLabel();
         jScrollPane1 = new javax.swing.JScrollPane();
-        jTable1 = new javax.swing.JTable();
+        tableAndamento = new javax.swing.JTable();
         jScrollPane2 = new javax.swing.JScrollPane();
-        jTable2 = new javax.swing.JTable();
+        tableFinalizados = new javax.swing.JTable();
         jLabel2 = new javax.swing.JLabel();
         menuBar = new javax.swing.JMenuBar();
         menuCadastro = new javax.swing.JMenu();
@@ -37,7 +150,7 @@ public class Principal extends javax.swing.JFrame {
 
         jLabel1.setText("Leilões em Andamento");
 
-        jTable1.setModel(new javax.swing.table.DefaultTableModel(
+        tableAndamento.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
                 {null, null, null, null, null},
                 {null, null, null, null, null},
@@ -48,9 +161,9 @@ public class Principal extends javax.swing.JFrame {
                 "Id", "Valor do Lote", "Usuário do melhor lance", "Melhor Lance", "Data/Hora Lance"
             }
         ));
-        jScrollPane1.setViewportView(jTable1);
+        jScrollPane1.setViewportView(tableAndamento);
 
-        jTable2.setModel(new javax.swing.table.DefaultTableModel(
+        tableFinalizados.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
                 {null, null, null, null},
                 {null, null, null, null},
@@ -61,7 +174,7 @@ public class Principal extends javax.swing.JFrame {
                 "Id", "Usuário vencedor", "Valor lance vencedor", "Data/Hora do termino"
             }
         ));
-        jScrollPane2.setViewportView(jTable2);
+        jScrollPane2.setViewportView(tableFinalizados);
 
         jLabel2.setText("Leilões Finalizados");
 
@@ -168,6 +281,7 @@ public class Principal extends javax.swing.JFrame {
         }
 
         java.awt.EventQueue.invokeLater(new Runnable() {
+            @Override
             public void run() {
                 new Principal().setVisible(true);
             }
@@ -180,12 +294,12 @@ public class Principal extends javax.swing.JFrame {
     private javax.swing.JMenuItem jMenuItem1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
-    private javax.swing.JTable jTable1;
-    private javax.swing.JTable jTable2;
     private javax.swing.JMenuBar menuBar;
     private javax.swing.JMenu menuCadastro;
     private javax.swing.JMenuItem menuItemCadastroBens;
     private javax.swing.JMenuItem menuItemCadastroLeilao;
     private javax.swing.JMenuItem menuItemCadastroUsuario;
+    private javax.swing.JTable tableAndamento;
+    private javax.swing.JTable tableFinalizados;
     // End of variables declaration//GEN-END:variables
 }

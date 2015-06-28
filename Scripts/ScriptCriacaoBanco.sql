@@ -105,3 +105,44 @@ insert into Bem VALUES (default, (select ID from CATEGORIABEM where CATEGORIA = 
 
 insert into USUARIO VALUES (default, (select ID from TIPOUSUARIO where TIPO = 'COMPRADOR'), 'Teste comprador', '00136985214', 'testescomprador@gmail.com');
 insert into USUARIO VALUES (default, (select ID from TIPOUSUARIO where TIPO = 'VENDEDOR'), 'Teste vendedor', '12345678945678', 'testesvendedor@gmail.com');
+
+insert into Lote VALUES (default, 1111.45);
+insert into Lote VALUES (default, 2222.95);
+
+insert into Lote_bem VALUES ((SELECT ID FROM LOTE WHERE PRECO = 1111.45), (SELECT ID FROM BEM WHERE DESCRICAO = 'Estante de madeira'));
+insert into Lote_bem VALUES ((SELECT ID FROM LOTE WHERE PRECO = 1111.45), (SELECT ID FROM BEM WHERE DESCRICAO = 'Estante de aço'));
+insert into Lote_bem VALUES ((SELECT ID FROM LOTE WHERE PRECO = 2222.95), (SELECT ID FROM BEM WHERE DESCRICAO = 'Notebook 3d'));
+
+insert into Leilao VALUES (default, 
+	(SELECT id from USUARIO WHERE NOME = 'Teste comprador'), 
+	(SELECT ID FROM LOTE WHERE PRECO = 1111.45),
+	(SELECT ID FROM NATUREZA WHERE NOME = 'OFERTA'),
+	(SELECT ID FROM FORMALANCE WHERE FORMA = 'FECHADO'),
+	'2014-12-10',
+	'2014-12-10',
+	'14:00',
+	'16:00'
+);
+	
+insert into Leilao VALUES (default, 
+	(SELECT id from USUARIO WHERE NOME = 'Teste vendedor'), 
+	(SELECT ID FROM LOTE WHERE PRECO = 2222.95),
+	(SELECT ID FROM NATUREZA WHERE NOME = 'DEMANDA'),
+	(SELECT ID FROM FORMALANCE WHERE FORMA = 'ABERTO'),
+	'2014-12-10',
+	'2014-12-10',
+	'14:00',
+	'16:00'
+);
+
+insert into Lance VALUES (default, (SELECT id from USUARIO WHERE NOME = 'Teste comprador'), (SELECT ID FROM LOTE WHERE PRECO = 1111.45), '2014-12-10', '14:15',	1110.00);
+insert into Lance VALUES (default, (SELECT id from USUARIO WHERE NOME = 'Teste comprador'), (SELECT ID FROM LOTE WHERE PRECO = 1111.45), '2014-12-10', '14:05', 1111.00);
+
+insert into Lance VALUES (default, (SELECT id from USUARIO WHERE NOME = 'Teste vendedor'), (SELECT ID FROM LOTE WHERE PRECO = 2222.95), '2014-12-10', '14:15', 2220.95);
+insert into Lance VALUES (default, (SELECT id from USUARIO WHERE NOME = 'Teste comprador'), (SELECT ID FROM LOTE WHERE PRECO = 2222.95), '2014-12-10', '14:45', 2223.95);
+	
+
+
+
+
+

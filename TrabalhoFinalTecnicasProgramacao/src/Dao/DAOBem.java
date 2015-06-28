@@ -187,4 +187,51 @@ public class DAOBem implements IDAOBem {
 
         return bens;
     }
+
+    @Override
+    public Collection<Bem> getAllByLot(int id) throws PersistenceException, ConnectionException {
+        Collection<Bem> bens = new ArrayList<>();
+        PreparedStatement sta = null;
+        ResultSet res = null;
+
+        try {
+            dbConnection.open();
+
+            String sql = "select b.ID as IdBem, b.DESCRICAO, b.DESCRICAOCOMPLETA, cb.ID as IDCATEGORIA, cb.CATEGORIA from Lote l "
+                    + "inner join lote_bem lb on l.ID = lb.IDLOTE "
+                    + "inner join bem b on lb.IDBEM = b.ID "
+                    + "inner join categoriabem cb on b.IDCATEGORIABEM = cb.ID "
+                    + "where l.ID = ?";
+
+            sta = dbConnection.getInstance().prepareStatement(sql);
+            sta.setInt(1, id);
+            res = sta.executeQuery();
+            while (res.next()) {
+                bens.add(new Bem(
+                        res.getInt("IdBem"),
+                        res.getString("DESCRICAO"),
+                        res.getString("DESCRICAOCOMPLETA"),
+                        new CategoriaBem(res.getInt("IDCATEGORIA"), res.getString("CATEGORIA"))
+                ));
+            }
+        } catch (ConnectionException | SQLException ex) {
+            throw new PersistenceException("Erro ao consultar Bens.", ex.getCause());
+        } finally {
+            try {
+                if (res != null && !res.isClosed()) {
+                    res.close();
+                }
+                if (sta != null && !sta.isClosed()) {
+                    sta.close();
+                }
+                if (dbConnection != null && dbConnection.isOpen()) {
+                    dbConnection.close();
+                }
+            } catch (SQLException ex) {
+                throw new ConnectionException(ex.getCause());
+            }
+        }
+
+        return bens;
+    }
 }
