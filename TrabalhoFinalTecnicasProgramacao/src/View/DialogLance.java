@@ -17,6 +17,8 @@ import Facade.UsuarioFacade;
 import Helpers.PopulateComponents;
 import java.math.BigDecimal;
 import java.util.Collection;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.util.Pair;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListModel;
@@ -68,7 +70,7 @@ public class DialogLance extends javax.swing.JFrame {
 
         if (statusLeilao == EnumStatusLeilao.ATIVO) {
             if (leilao.getFormalance().getId() == EnumFormaLance.ABERTO) {
-                configureListLances(idLeilao);                
+                configureListLances(idLeilao);
             } else {
                 txtUsuarioVencedor.setText("");
                 txtLanceVencedor.setText("");
@@ -330,7 +332,17 @@ public class DialogLance extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnCancelarLanceActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCancelarLanceActionPerformed
-
+        try {
+            for (int i = 0; i < listLancesUsuario.getModel().getSize(); i++) {
+                if ((Lance) listLancesUsuario.getModel().getElementAt(i) != null) {
+                    Lance lance = (Lance) listLancesUsuario.getSelectedValue();
+                    lanceFacade.cancelaLance(lance.getId());
+                }
+            }
+            configureListLances(leilao.getId());
+        } catch (ConnectionException | PersistenceException ex) {
+            JOptionPane.showMessageDialog(rootPane, ex.getMessage(), "ERRO", JOptionPane.ERROR_MESSAGE);
+        }
     }//GEN-LAST:event_btnCancelarLanceActionPerformed
 
     private void btnEfetuarLanceActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEfetuarLanceActionPerformed

@@ -31,7 +31,7 @@ public class DAOLance implements IDAOLance {
 
             return sta.executeUpdate();
 
-        } catch (SQLException ex) {
+        } catch (ConnectionException | SQLException ex) {
             throw new ConnectionException(ex.getCause());
         } finally {
             try {
@@ -128,6 +128,34 @@ public class DAOLance implements IDAOLance {
                 if (res != null && !res.isClosed()) {
                     res.close();
                 }
+                if (sta != null && !sta.isClosed()) {
+                    sta.close();
+                }
+                if (dbConnection != null && dbConnection.isOpen()) {
+                    dbConnection.close();
+                }
+            } catch (SQLException ex) {
+                throw new ConnectionException(ex.getCause());
+            }
+        }
+    }
+
+    @Override
+    public void remove(int idLance) throws PersistenceException, ConnectionException {
+        PreparedStatement sta = null;
+
+        try {
+            dbConnection.open();
+
+            String sql = "DELETE FROM LANCE WHERE ID = ?";
+
+            sta = dbConnection.getInstance().prepareStatement(sql);
+            sta.setInt(1, idLance);
+            sta.execute();
+        } catch (ConnectionException | SQLException ex) {
+            throw new PersistenceException("Erro ao consultar Bens.", ex.getCause());
+        } finally {
+            try {
                 if (sta != null && !sta.isClosed()) {
                     sta.close();
                 }

@@ -9,4 +9,5 @@ public interface IDAOLance{
     Collection<Lance> getAllByLot(int idLote) throws ConnectionException, PersistenceException;
     int insert(Lance entity) throws ConnectionException, PersistenceException;
     Lance getBestByLot(int idLote, int idNatureza) throws ConnectionException, PersistenceException;
+    void remove(int idLance) throws PersistenceException, ConnectionException;
 }

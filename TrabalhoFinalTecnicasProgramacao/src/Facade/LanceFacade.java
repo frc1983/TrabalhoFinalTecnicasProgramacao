@@ -24,4 +24,8 @@ public class LanceFacade {
     public int cadastrarLance(Lance lance) throws ConnectionException{
         return daoLance.insert(lance);
     }
+
+    public void cancelaLance(int idLance) throws PersistenceException, ConnectionException {
+        daoLance.remove(idLance);
+    }
 }
