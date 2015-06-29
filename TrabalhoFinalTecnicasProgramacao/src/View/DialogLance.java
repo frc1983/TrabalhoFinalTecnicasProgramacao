@@ -5,7 +5,9 @@ import Domain.Lance;
 import Domain.Leilao;
 import Domain.Lote;
 import Domain.Usuario;
+import Enumerators.EnumFormaLance;
 import Enumerators.EnumStatusLeilao;
+import Enumerators.EnumTipoUsuario;
 import Exception.ConnectionException;
 import Exception.PersistenceException;
 import Facade.BemFacade;
@@ -14,11 +16,7 @@ import Facade.LeilaoFacade;
 import Facade.UsuarioFacade;
 import Helpers.PopulateComponents;
 import java.math.BigDecimal;
-import java.sql.Date;
-import java.util.Calendar;
 import java.util.Collection;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javafx.util.Pair;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListModel;
@@ -50,20 +48,33 @@ public class DialogLance extends javax.swing.JFrame {
         lanceFacade = new LanceFacade();
 
         leilao = leilaoFacade.buscarPorId(idLeilao);
-        usuarios = usuarioFacade.buscarTodosPorTipo(leilao.getUsuario().getTipoUsuario().getId());        
-        
-        maiorLance = lanceFacade.buscarMaiorPorLote(idLeilao);
-        if(maiorLance != null) {
+
+        if (leilao.getUsuario().getTipoUsuario().getId() == EnumTipoUsuario.COMPRADOR) {
+            usuarios = usuarioFacade.buscarTodosPorTipo(EnumTipoUsuario.VENDEDOR);
+        } else {
+            usuarios = usuarioFacade.buscarTodosPorTipo(EnumTipoUsuario.COMPRADOR);
+        }
+
+        maiorLance = lanceFacade.buscarMelhorLancePorLote(idLeilao, leilao.getNatureza().getId());
+        if (maiorLance != null) {
             txtUsuarioVencedor.setText(usuarioFacade.buscarPorId(maiorLance.getUsuario().getId()).getNome());
             txtLanceVencedor.setText(maiorLance.toString());
         }
-        
+
         lote = leilao.getLote();
 
         configureComboUsuarios(usuarios);
         configureListItensLote();
-        configureListLances(idLeilao);
-        
+
+        if (statusLeilao == EnumStatusLeilao.ATIVO) {
+            if (leilao.getFormalance().getId() == EnumFormaLance.ABERTO) {
+                configureListLances(idLeilao);                
+            } else {
+                txtUsuarioVencedor.setText("");
+                txtLanceVencedor.setText("");
+            }
+        }
+
         txtNatureza.setText(leilao.getNatureza().getNome());
         txtFormaLance.setText(leilao.getFormalance().getForma());
 
@@ -131,8 +142,6 @@ public class DialogLance extends javax.swing.JFrame {
         txtFormaLance = new javax.swing.JTextField();
         jLabel7 = new javax.swing.JLabel();
         txtLanceVencedor = new javax.swing.JTextField();
-        javax.swing.JToggleButton btnCancelarLance = new javax.swing.JToggleButton();
-        jSeparator1 = new javax.swing.JSeparator();
         panelLance = new javax.swing.JPanel();
         jLabel6 = new javax.swing.JLabel();
         jLabel8 = new javax.swing.JLabel();
@@ -140,16 +149,13 @@ public class DialogLance extends javax.swing.JFrame {
         jLabel9 = new javax.swing.JLabel();
         javax.swing.JToggleButton btnEfetuarLance = new javax.swing.JToggleButton();
         txtLance = new javax.swing.JFormattedTextField();
+        javax.swing.JToggleButton btnCancelarLance = new javax.swing.JToggleButton();
+        jSeparator1 = new javax.swing.JSeparator();
         jLabel10 = new javax.swing.JLabel();
         txtUsuarioVencedor = new javax.swing.JTextField();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
-        listLancesUsuario.setModel(new javax.swing.AbstractListModel() {
-            String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
-            public int getSize() { return strings.length; }
-            public Object getElementAt(int i) { return strings[i]; }
-        });
         jScrollPane1.setViewportView(listLancesUsuario);
 
         jLabel1.setText("Lances:");
@@ -178,15 +184,8 @@ public class DialogLance extends javax.swing.JFrame {
 
         jLabel7.setText("Lance vencedor:");
 
-        txtLanceVencedor.setText("jTextField3");
+        txtLanceVencedor.setToolTipText("");
         txtLanceVencedor.setEnabled(false);
-
-        btnCancelarLance.setText("Cancelar lance");
-        btnCancelarLance.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnCancelarLanceActionPerformed(evt);
-            }
-        });
 
         jLabel6.setText("Lance:");
 
@@ -205,6 +204,13 @@ public class DialogLance extends javax.swing.JFrame {
 
         txtLance.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#,##0.00"))));
 
+        btnCancelarLance.setText("Cancelar lance");
+        btnCancelarLance.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnCancelarLanceActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout panelLanceLayout = new javax.swing.GroupLayout(panelLance);
         panelLance.setLayout(panelLanceLayout);
         panelLanceLayout.setHorizontalGroup(
@@ -218,25 +224,34 @@ public class DialogLance extends javax.swing.JFrame {
                     .addComponent(cmbUsuarios, 0, 237, Short.MAX_VALUE)
                     .addComponent(jLabel6)
                     .addComponent(txtLance))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(btnCancelarLance)
+                .addGap(178, 178, 178))
+            .addComponent(jSeparator1, javax.swing.GroupLayout.Alignment.TRAILING)
         );
         panelLanceLayout.setVerticalGroup(
             panelLanceLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(panelLanceLayout.createSequentialGroup()
                 .addContainerGap()
+                .addComponent(btnCancelarLance)
+                .addGap(8, 8, 8)
+                .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(jLabel6)
                 .addGap(18, 18, 18)
                 .addComponent(jLabel8)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(cmbUsuarios, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
-                .addComponent(jLabel9)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jLabel9)
+                .addGap(25, 25, 25)
                 .addComponent(txtLance, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(btnEfetuarLance)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap())
         );
+
+        btnCancelarLance.getAccessibleContext().setAccessibleName("btnCancelarLance");
 
         jLabel10.setText("Usuário vencedor:");
 
@@ -246,45 +261,37 @@ public class DialogLance extends javax.swing.JFrame {
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jSeparator1, javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(panelLance, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(jLabel3)
+                            .addComponent(jLabel4)
+                            .addComponent(jLabel5)
+                            .addComponent(txtNatureza, javax.swing.GroupLayout.DEFAULT_SIZE, 237, Short.MAX_VALUE)
+                            .addComponent(txtFormaLance))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 16, Short.MAX_VALUE)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(panelLance, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jLabel2)
+                            .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 232, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(18, 18, 18)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel1)
+                            .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 236, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(18, 18, 18)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(layout.createSequentialGroup()
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                                    .addGroup(layout.createSequentialGroup()
-                                        .addGap(0, 0, Short.MAX_VALUE)
-                                        .addComponent(btnCancelarLance))
-                                    .addGroup(layout.createSequentialGroup()
-                                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                            .addComponent(jLabel3)
-                                            .addComponent(jLabel4)
-                                            .addComponent(jLabel5)
-                                            .addComponent(txtNatureza, javax.swing.GroupLayout.DEFAULT_SIZE, 237, Short.MAX_VALUE)
-                                            .addComponent(txtFormaLance))
-                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 16, Short.MAX_VALUE)
-                                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                            .addComponent(jLabel2)
-                                            .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 232, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                        .addGap(18, 18, 18)
-                                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                            .addComponent(jLabel1)
-                                            .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 236, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                                .addGap(18, 18, 18)
+                                .addGap(0, 0, Short.MAX_VALUE)
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addGroup(layout.createSequentialGroup()
-                                        .addGap(0, 0, Short.MAX_VALUE)
-                                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                            .addComponent(jLabel7)
-                                            .addComponent(txtLanceVencedor, javax.swing.GroupLayout.PREFERRED_SIZE, 162, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                                    .addGroup(layout.createSequentialGroup()
-                                        .addComponent(jLabel10)
-                                        .addGap(0, 0, Short.MAX_VALUE))
-                                    .addComponent(txtUsuarioVencedor))))
-                        .addContainerGap())))
+                                    .addComponent(jLabel7)
+                                    .addComponent(txtLanceVencedor, javax.swing.GroupLayout.PREFERRED_SIZE, 162, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(jLabel10)
+                                .addGap(0, 0, Short.MAX_VALUE))
+                            .addComponent(txtUsuarioVencedor))))
+                .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -306,8 +313,8 @@ public class DialogLance extends javax.swing.JFrame {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(txtFormaLance, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                        .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 221, Short.MAX_VALUE)
-                        .addComponent(jScrollPane2))
+                        .addComponent(jScrollPane1)
+                        .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 221, Short.MAX_VALUE))
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(txtLanceVencedor, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -315,21 +322,15 @@ public class DialogLance extends javax.swing.JFrame {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(txtUsuarioVencedor, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(btnCancelarLance)
-                .addGap(9, 9, 9)
-                .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(panelLance, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addContainerGap())
         );
-
-        btnCancelarLance.getAccessibleContext().setAccessibleName("btnCancelarLance");
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnCancelarLanceActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCancelarLanceActionPerformed
-        // TODO add your handling code here:
+
     }//GEN-LAST:event_btnCancelarLanceActionPerformed
 
     private void btnEfetuarLanceActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEfetuarLanceActionPerformed
@@ -340,10 +341,10 @@ public class DialogLance extends javax.swing.JFrame {
             } else {
                 preco = BigDecimal.valueOf(Double.parseDouble(txtLance.getText().replace(".", "").replace(',', '.')));
             }
-            
+
             Pair<Integer, String> selectedUsuario = (Pair<Integer, String>) cmbUsuarios.getSelectedItem();
             Usuario u = usuarioFacade.buscarPorId(selectedUsuario.getKey());
-            
+
             Lance l = new Lance(0, null, null, preco, lote, u);
 
             int idLance = lanceFacade.cadastrarLance(l);

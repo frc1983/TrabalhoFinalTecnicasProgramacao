@@ -17,8 +17,8 @@ public class LanceFacade {
         return daoLance.getAllByLot(idLote);
     }
     
-    public Lance buscarMaiorPorLote(int idLote) throws ConnectionException, PersistenceException{
-        return daoLance.getHighestByLot(idLote);
+    public Lance buscarMelhorLancePorLote(int idLote, int idNatureza) throws ConnectionException, PersistenceException{
+        return daoLance.getBestByLot(idLote, idNatureza);
     }
     
     public int cadastrarLance(Lance lance) throws ConnectionException{

@@ -80,7 +80,7 @@ public class Principal extends javax.swing.JFrame {
         model.setRowCount(0);
         try {
             for (Leilao leilao : leilaoFacade.buscarTodosPorTipo(EnumStatusLeilao.TERMINADO)) {
-                Lance melhor = lanceFacade.buscarMaiorPorLote(leilao.getLote().getId());
+                Lance melhor = lanceFacade.buscarMelhorLancePorLote(leilao.getLote().getId(), leilao.getNatureza().getId());
                 if (melhor != null) {
                     model.addRow(new Object[]{
                         leilao.getId(),
@@ -88,6 +88,14 @@ public class Principal extends javax.swing.JFrame {
                         usuarioFacade.buscarPorId(melhor.getUsuario().getId()).getNome(),
                         melhor.getValor(),
                         melhor.getData() + " " + melhor.getHora()
+                    });
+                } else {
+                    model.addRow(new Object[]{
+                        leilao.getId(),
+                        leilao.getLote().getPreco(),
+                        " - ",
+                        " - ",
+                        leilao.getDatatermino() + " " + leilao.getHoratermino()
                     });
                 }
             }
@@ -101,7 +109,7 @@ public class Principal extends javax.swing.JFrame {
         model.setRowCount(0);
         try {
             for (Leilao leilao : leilaoFacade.buscarTodosPorTipo(EnumStatusLeilao.ATIVO)) {
-                Lance melhor = lanceFacade.buscarMaiorPorLote(leilao.getLote().getId());
+                Lance melhor = lanceFacade.buscarMelhorLancePorLote(leilao.getLote().getId(), leilao.getNatureza().getId());
                 if (melhor != null) {
                     model.addRow(new Object[]{
                         leilao.getId(),
@@ -165,13 +173,13 @@ public class Principal extends javax.swing.JFrame {
 
         tableFinalizados.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null}
+                {null, null, null, null, null},
+                {null, null, null, null, null},
+                {null, null, null, null, null},
+                {null, null, null, null, null}
             },
             new String [] {
-                "Id", "Usuário vencedor", "Valor lance vencedor", "Data/Hora do termino"
+                "Id", "Valor Lote", "Usuário vencedor", "Valor lance vencedor", "Data/Hora do termino"
             }
         ));
         jScrollPane2.setViewportView(tableFinalizados);

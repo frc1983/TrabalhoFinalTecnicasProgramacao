@@ -81,7 +81,7 @@ public class DAOLeilao implements IDAOLeilao {
             if (status == EnumStatusLeilao.ATIVO) {
                 sql = "SELECT * FROM Leilao WHERE DATE(DATAINICIO) >= CURRENT DATE AND DATE(DATATERMINO) <= CURRENT DATE";
             } else if (status == EnumStatusLeilao.TERMINADO) {
-                sql = "SELECT * FROM Leilao WHERE DATE(DATATERMINO) < CURRENT DATE";
+                sql = "SELECT * FROM Leilao WHERE DATE(DATATERMINO) <= CURRENT DATE AND ID NOT IN (SELECT ID FROM Leilao WHERE DATE(DATAINICIO) >= CURRENT DATE AND DATE(DATATERMINO) <= CURRENT DATE)";
             }
             
             dbConnection.open();

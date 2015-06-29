@@ -4,6 +4,7 @@ import Connection.DBConnection;
 import Domain.Natureza;
 import Exception.ConnectionException;
 import Exception.PersistenceException;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -57,16 +58,17 @@ public class DAONatureza implements IDAONatureza {
     @Override
     public Natureza getById(int id) throws ConnectionException, PersistenceException {
         Natureza natureza = null;
-        Statement sta = null;
+        PreparedStatement sta = null;
         ResultSet res = null;
 
         try {
             dbConnection.open();
 
-            String sql = "SELECT * FROM Natureza";
+            String sql = "SELECT * FROM Natureza WHERE ID = ?";
 
-            sta = dbConnection.getInstance().createStatement();
-            res = sta.executeQuery(sql);
+            sta = dbConnection.getInstance().prepareStatement(sql);
+            sta.setInt(1, id);
+            res = sta.executeQuery();
             while (res.next()) {
                 natureza = new Natureza(
                         res.getInt("ID"),

@@ -1,15 +1,13 @@
 package Dao;
 
 import Connection.DBConnection;
-import Domain.Bem;
-import Domain.CategoriaBem;
 import Domain.Lance;
+import Enumerators.EnumNatureza;
 import Exception.ConnectionException;
 import Exception.PersistenceException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -95,14 +93,18 @@ public class DAOLance implements IDAOLance {
     }
 
     @Override
-    public Lance getHighestByLot(int idLote) throws PersistenceException, ConnectionException {
+    public Lance getBestByLot(int idLote, int idNatureza) throws PersistenceException, ConnectionException {
         PreparedStatement sta = null;
         ResultSet res = null;
 
         try {
             dbConnection.open();
 
-            String sql = "SELECT * FROM LANCE WHERE IDLOTE = ? ORDER BY VALOR DESC";
+            String sql = "";
+            if(idNatureza == EnumNatureza.OFERTA)
+                sql = "SELECT * FROM LANCE WHERE IDLOTE = ? ORDER BY VALOR ASC";
+            else if(idNatureza == EnumNatureza.DEMANDA)
+                sql = "SELECT * FROM LANCE WHERE IDLOTE = ? ORDER BY VALOR DESC";
 
             sta = dbConnection.getInstance().prepareStatement(sql);
             sta.setInt(1, idLote);

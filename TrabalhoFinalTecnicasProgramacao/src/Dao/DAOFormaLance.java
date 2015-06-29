@@ -4,6 +4,7 @@ import Connection.DBConnection;
 import Domain.FormaLance;
 import Exception.ConnectionException;
 import Exception.PersistenceException;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -57,16 +58,17 @@ public class DAOFormaLance implements IDAOFormaLance {
     @Override
     public FormaLance getById(int id) throws ConnectionException, PersistenceException {
         FormaLance formaLance = null;
-        Statement sta = null;
+        PreparedStatement sta = null;
         ResultSet res = null;
 
         try {
             dbConnection.open();
 
-            String sql = "SELECT * FROM FORMALANCE";
+            String sql = "SELECT * FROM FORMALANCE WHERE ID = ?";
 
-            sta = dbConnection.getInstance().createStatement();
-            res = sta.executeQuery(sql);
+            sta = dbConnection.getInstance().prepareStatement(sql);
+            sta.setInt(1, id);
+            res = sta.executeQuery();
             while (res.next()) {
                 formaLance = new FormaLance(
                         res.getInt("ID"),
