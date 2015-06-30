@@ -10,60 +10,56 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collection;
 
 public class DAOLeilao implements IDAOLeilao {
 
-    DBConnection dbConnection = new DBConnection();
+    Connection conn = null;
+    ResultSet res = null;
+    Statement sta = null;
+    PreparedStatement preparedsta = null;
+    Collection<Leilao> leiloes;
 
     @Override
     public boolean insert(Leilao leilao) throws ConnectionException, PersistenceException {
 
-        PreparedStatement staLeilao = null;
-
         try {
-            dbConnection.open();
-            dbConnection.openTransaction();
-            
-            Connection instance = dbConnection.getInstance();
+            conn = DBConnection.getInstance();
+            DBConnection.openTransaction();
 
             DAOLote daoLote = new DAOLote();
             Lote lote = leilao.getLote();
-            int idLote = daoLote.insert(instance, lote);
+            int idLote = daoLote.insert(lote);
             lote.setId(idLote);
 
             String sql = "INSERT INTO Leilao (IDUSUARIO, IDLOTE, IDNATUREZA, IDFORMALANCE, DATAINICIO, DATATERMINO, HORAINICIO, HORATERMINO) VALUES (?,?,?,?,?,?,?,?)";
 
-            staLeilao = instance.prepareStatement(sql);
-            staLeilao.setInt(1, leilao.getUsuario().getId());
-            staLeilao.setInt(2, leilao.getLote().getId());
-            staLeilao.setInt(3, leilao.getNatureza().getId());
-            staLeilao.setInt(4, leilao.getFormalance().getId());
-            staLeilao.setDate(5, leilao.getDatainicio());
-            staLeilao.setDate(6, leilao.getDatatermino());
-            staLeilao.setTime(7, leilao.getHorainicio());
-            staLeilao.setTime(8, leilao.getHoratermino());
+            preparedsta = conn.prepareStatement(sql);
+            preparedsta.setInt(1, leilao.getUsuario().getId());
+            preparedsta.setInt(2, leilao.getLote().getId());
+            preparedsta.setInt(3, leilao.getNatureza().getId());
+            preparedsta.setInt(4, leilao.getFormalance().getId());
+            preparedsta.setDate(5, leilao.getDatainicio());
+            preparedsta.setDate(6, leilao.getDatatermino());
+            preparedsta.setTime(7, leilao.getHorainicio());
+            preparedsta.setTime(8, leilao.getHoratermino());
 
-            int idLeilao = staLeilao.executeUpdate();
+            preparedsta.executeUpdate();
 
-            dbConnection.closeTransaction();
-            dbConnection.commit();
+            DBConnection.closeTransaction();
+            conn.commit();
 
         } catch (ConnectionException | SQLException ex) {
-            dbConnection.rollback();
-            throw new ConnectionException(ex.getCause());
-        } finally {
             try {
-                if (staLeilao != null && !staLeilao.isClosed()) {
-                    staLeilao.close();
-                }
-                if (dbConnection != null && dbConnection.isOpen()) {
-                    dbConnection.close();
-                }
-            } catch (SQLException ex) {
-                throw new ConnectionException(ex.getCause());
+                conn.rollback();
+            } catch (SQLException ex1) {
+                throw new PersistenceException("Erro ao inserir Leilão.", ex1.getCause());
             }
+            throw new PersistenceException("Erro ao inserir Leilão.", ex.getCause());
+        } finally {
+            DBConnection.close(conn, preparedsta, null);
         }
 
         return true;
@@ -71,22 +67,26 @@ public class DAOLeilao implements IDAOLeilao {
 
     @Override
     public Collection<Leilao> getAllByStatus(int status) throws ConnectionException, PersistenceException {
-        Collection<Leilao> leiloes = new ArrayList<>();
-        PreparedStatement sta = null;
-        ResultSet res = null;
-
         try {
+            leiloes = new ArrayList<>();
             String sql = "";
 
             if (status == EnumStatusLeilao.ATIVO) {
-                sql = "SELECT * FROM Leilao WHERE DATE(DATAINICIO) >= CURRENT DATE AND DATE(DATATERMINO) <= CURRENT DATE";
+                sql = "SELECT * "
+                        + "FROM Leilao "
+                        + "WHERE DATE(DATAINICIO) >= CURRENT DATE AND DATE(DATATERMINO) <= CURRENT DATE "
+                        + "AND CURRENT TIME >= TIME(HORAINICIO) AND CURRENT TIME < TIME(HORATERMINO)";
             } else if (status == EnumStatusLeilao.TERMINADO) {
-                sql = "SELECT * FROM Leilao WHERE DATE(DATATERMINO) <= CURRENT DATE AND ID NOT IN (SELECT ID FROM Leilao WHERE DATE(DATAINICIO) >= CURRENT DATE AND DATE(DATATERMINO) <= CURRENT DATE)";
+                sql = "SELECT * FROM Leilao "
+                        + "WHERE ID NOT IN ("
+                        + "    SELECT ID"
+                        + "    FROM Leilao "
+                        + "    WHERE DATE(DATAINICIO) >= CURRENT DATE AND TIME(HORATERMINO) > CURRENT TIME)";
             }
-            
-            dbConnection.open();
-            sta = dbConnection.getInstance().prepareStatement(sql);
-            res = sta.executeQuery();
+
+            conn = DBConnection.getInstance();
+            preparedsta = conn.prepareStatement(sql);
+            res = preparedsta.executeQuery();
             while (res.next()) {
                 leiloes.add(new Leilao(
                         res.getInt("ID"),
@@ -103,19 +103,7 @@ public class DAOLeilao implements IDAOLeilao {
         } catch (ConnectionException | SQLException ex) {
             throw new PersistenceException("Erro ao consultar Leilões.", ex.getCause());
         } finally {
-            try {
-                if (res != null && !res.isClosed()) {
-                    res.close();
-                }
-                if (sta != null && !sta.isClosed()) {
-                    sta.close();
-                }
-                if (dbConnection != null && dbConnection.isOpen()) {
-                    dbConnection.close();
-                }
-            } catch (SQLException ex) {
-                throw new ConnectionException(ex.getCause());
-            }
+            DBConnection.close(conn, preparedsta, res);
         }
 
         return leiloes;
@@ -123,20 +111,15 @@ public class DAOLeilao implements IDAOLeilao {
 
     @Override
     public Leilao getById(int id) throws PersistenceException, ConnectionException {
-        Leilao leilao = null;
-        PreparedStatement sta = null;
-        ResultSet res = null;
-
         try {
-            dbConnection.open();
-
             String sql = "SELECT * FROM LEILAO WHERE id = ?";
 
-            sta = dbConnection.getInstance().prepareStatement(sql);
-            sta.setInt(1, id);
-            res = sta.executeQuery();
+            conn = DBConnection.getInstance();
+            preparedsta = conn.prepareStatement(sql);
+            preparedsta.setInt(1, id);
+            res = preparedsta.executeQuery();
             while (res.next()) {
-                leilao = new Leilao(
+                return new Leilao(
                         res.getInt("ID"),
                         new DAOUsuario().getById(res.getInt("IDUSUARIO")),
                         new DAOFormaLance().getById(res.getInt("IDFORMALANCE")),
@@ -148,24 +131,12 @@ public class DAOLeilao implements IDAOLeilao {
                         res.getTime("HORATERMINO")
                 );
             }
-            
-            return leilao;
+
+            return null;
         } catch (ConnectionException | SQLException ex) {
-            throw new PersistenceException("Erro ao consultar Lote.", ex.getCause());
+            throw new PersistenceException("Erro ao consultar Leilão.", ex.getCause());
         } finally {
-            try {
-                if (res != null && !res.isClosed()) {
-                    res.close();
-                }
-                if (sta != null && !sta.isClosed()) {
-                    sta.close();
-                }
-                if (dbConnection != null && dbConnection.isOpen()) {
-                    dbConnection.close();
-                }
-            } catch (SQLException ex) {
-                throw new ConnectionException(ex.getCause());
-            }
+            DBConnection.close(conn, preparedsta, res);
         }
     }
 }

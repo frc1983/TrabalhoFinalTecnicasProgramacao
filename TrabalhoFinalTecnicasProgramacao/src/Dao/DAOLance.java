@@ -5,62 +5,52 @@ import Domain.Lance;
 import Enumerators.EnumNatureza;
 import Exception.ConnectionException;
 import Exception.PersistenceException;
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collection;
 
 public class DAOLance implements IDAOLance {
-
-    DBConnection dbConnection = new DBConnection();
+    Connection conn = null;
+    ResultSet res = null;
+    Statement sta = null;
+    PreparedStatement preparedsta = null;
+    Collection<Lance> lances;
 
     @Override
     public int insert(Lance lance) throws ConnectionException {
-        PreparedStatement sta = null;
-
         try {
-            dbConnection.open();
             String sql = "INSERT INTO Lance (IDUSUARIO, IDLOTE, DATA, HORA, VALOR) "
                     + "VALUES (?,?,(SELECT CURRENT_DATE FROM SYSIBM.SYSDUMMY1),(SELECT CURRENT_TIME FROM SYSIBM.SYSDUMMY1),?)";
 
-            sta = dbConnection.getInstance().prepareStatement(sql);
-            sta.setInt(1, lance.getUsuario().getId());
-            sta.setInt(2, lance.getLote().getId());
-            sta.setBigDecimal(3, lance.getValor());
+            conn = DBConnection.getInstance();
+            preparedsta = conn.prepareStatement(sql);
+            preparedsta.setInt(1, lance.getUsuario().getId());
+            preparedsta.setInt(2, lance.getLote().getId());
+            preparedsta.setBigDecimal(3, lance.getValor());
 
-            return sta.executeUpdate();
+            return preparedsta.executeUpdate();
 
         } catch (ConnectionException | SQLException ex) {
             throw new ConnectionException(ex.getCause());
         } finally {
-            try {
-                if (sta != null && !sta.isClosed()) {
-                    sta.close();
-                }
-                if (dbConnection != null && dbConnection.isOpen()) {
-                    dbConnection.close();
-                }
-            } catch (SQLException ex) {
-                throw new ConnectionException(ex.getCause());
-            }
+            DBConnection.close(conn, preparedsta, null);
         }
     }
 
     @Override
     public Collection<Lance> getAllByLot(int idLote) throws PersistenceException, ConnectionException {
-        Collection<Lance> lances = new ArrayList<>();
-        PreparedStatement sta = null;
-        ResultSet res = null;
-
         try {
-            dbConnection.open();
-
+            lances = new ArrayList<>();
             String sql = "SELECT * FROM LANCE WHERE IDLOTE = ?";
 
-            sta = dbConnection.getInstance().prepareStatement(sql);
-            sta.setInt(1, idLote);
-            res = sta.executeQuery();
+            conn = DBConnection.getInstance();
+            preparedsta = conn.prepareStatement(sql);
+            preparedsta.setInt(1, idLote);
+            res = preparedsta.executeQuery();
             while (res.next()) {
                 lances.add(new Lance(
                         res.getInt("ID"),
@@ -72,21 +62,9 @@ public class DAOLance implements IDAOLance {
                 ));
             }
         } catch (ConnectionException | SQLException ex) {
-            throw new PersistenceException("Erro ao consultar Bens.", ex.getCause());
+            throw new PersistenceException("Erro ao consultar Lances.", ex.getCause());
         } finally {
-            try {
-                if (res != null && !res.isClosed()) {
-                    res.close();
-                }
-                if (sta != null && !sta.isClosed()) {
-                    sta.close();
-                }
-                if (dbConnection != null && dbConnection.isOpen()) {
-                    dbConnection.close();
-                }
-            } catch (SQLException ex) {
-                throw new ConnectionException(ex.getCause());
-            }
+            DBConnection.close(conn, preparedsta, null);
         }
 
         return lances;
@@ -94,21 +72,17 @@ public class DAOLance implements IDAOLance {
 
     @Override
     public Lance getBestByLot(int idLote, int idNatureza) throws PersistenceException, ConnectionException {
-        PreparedStatement sta = null;
-        ResultSet res = null;
-
         try {
-            dbConnection.open();
-
             String sql = "";
             if(idNatureza == EnumNatureza.OFERTA)
                 sql = "SELECT * FROM LANCE WHERE IDLOTE = ? ORDER BY VALOR ASC";
             else if(idNatureza == EnumNatureza.DEMANDA)
                 sql = "SELECT * FROM LANCE WHERE IDLOTE = ? ORDER BY VALOR DESC";
 
-            sta = dbConnection.getInstance().prepareStatement(sql);
-            sta.setInt(1, idLote);
-            res = sta.executeQuery();
+            conn = DBConnection.getInstance();
+            preparedsta = conn.prepareStatement(sql);
+            preparedsta.setInt(1, idLote);
+            res = preparedsta.executeQuery();
             while (res.next()) {
                 return new Lance(
                         res.getInt("ID"),
@@ -122,49 +96,25 @@ public class DAOLance implements IDAOLance {
             
             return null;
         } catch (ConnectionException | SQLException ex) {
-            throw new PersistenceException("Erro ao consultar Bens.", ex.getCause());
+            throw new PersistenceException("Erro ao consultar Lances.", ex.getCause());
         } finally {
-            try {
-                if (res != null && !res.isClosed()) {
-                    res.close();
-                }
-                if (sta != null && !sta.isClosed()) {
-                    sta.close();
-                }
-                if (dbConnection != null && dbConnection.isOpen()) {
-                    dbConnection.close();
-                }
-            } catch (SQLException ex) {
-                throw new ConnectionException(ex.getCause());
-            }
+            DBConnection.close(conn, preparedsta, res);
         }
     }
 
     @Override
     public void remove(int idLance) throws PersistenceException, ConnectionException {
-        PreparedStatement sta = null;
-
         try {
-            dbConnection.open();
-
             String sql = "DELETE FROM LANCE WHERE ID = ?";
 
-            sta = dbConnection.getInstance().prepareStatement(sql);
-            sta.setInt(1, idLance);
-            sta.execute();
+            conn = DBConnection.getInstance();
+            preparedsta = conn.prepareStatement(sql);
+            preparedsta.setInt(1, idLance);
+            preparedsta.execute();
         } catch (ConnectionException | SQLException ex) {
-            throw new PersistenceException("Erro ao consultar Bens.", ex.getCause());
+            throw new PersistenceException("Erro ao remove Lance.", ex.getCause());
         } finally {
-            try {
-                if (sta != null && !sta.isClosed()) {
-                    sta.close();
-                }
-                if (dbConnection != null && dbConnection.isOpen()) {
-                    dbConnection.close();
-                }
-            } catch (SQLException ex) {
-                throw new ConnectionException(ex.getCause());
-            }
+            DBConnection.close(conn, preparedsta, null);
         }
     }
 }

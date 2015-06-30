@@ -81,23 +81,7 @@ public class Principal extends javax.swing.JFrame {
         try {
             for (Leilao leilao : leilaoFacade.buscarTodosPorTipo(EnumStatusLeilao.TERMINADO)) {
                 Lance melhor = lanceFacade.buscarMelhorLancePorLote(leilao.getLote().getId(), leilao.getNatureza().getId());
-                if (melhor != null) {
-                    model.addRow(new Object[]{
-                        leilao.getId(),
-                        leilao.getLote().getPreco(),
-                        usuarioFacade.buscarPorId(melhor.getUsuario().getId()).getNome(),
-                        melhor.getValor(),
-                        melhor.getData() + " " + melhor.getHora()
-                    });
-                } else {
-                    model.addRow(new Object[]{
-                        leilao.getId(),
-                        leilao.getLote().getPreco(),
-                        " - ",
-                        " - ",
-                        leilao.getDatatermino() + " " + leilao.getHoratermino()
-                    });
-                }
+                configureRowTerminado(model, leilao, melhor);
             }
         } catch (ConnectionException | PersistenceException ex) {
             JOptionPane.showMessageDialog(rootPane, ex.getMessage(), "ERRO", JOptionPane.ERROR_MESSAGE);
@@ -110,7 +94,35 @@ public class Principal extends javax.swing.JFrame {
         try {
             for (Leilao leilao : leilaoFacade.buscarTodosPorTipo(EnumStatusLeilao.ATIVO)) {
                 Lance melhor = lanceFacade.buscarMelhorLancePorLote(leilao.getLote().getId(), leilao.getNatureza().getId());
-                if (melhor != null) {
+                configureRowAndamento(model, leilao, melhor);
+            }
+        } catch (ConnectionException | PersistenceException ex) {
+            JOptionPane.showMessageDialog(rootPane, ex.getMessage(), "ERRO", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+    
+    private void configureRowTerminado(DefaultTableModel model, Leilao leilao, Lance melhor) throws ConnectionException, PersistenceException {
+        if (melhor != null) {
+                    model.addRow(new Object[]{
+                        leilao.getId(),
+                        leilao.getLote().getPreco(),
+                        usuarioFacade.buscarPorId(melhor.getUsuario().getId()).getNome(),
+                        melhor.getValor(),
+                        leilao.getDatatermino() + " " + leilao.getHoratermino()
+                    });
+                } else {
+                    model.addRow(new Object[]{
+                        leilao.getId(),
+                        leilao.getLote().getPreco(),
+                        " - ",
+                        " - ",
+                        leilao.getDatatermino() + " " + leilao.getHoratermino()
+                    });
+                }
+    }
+    
+    private void configureRowAndamento(DefaultTableModel model, Leilao leilao, Lance melhor) throws ConnectionException, PersistenceException {
+        if (melhor != null) {
                     model.addRow(new Object[]{
                         leilao.getId(),
                         leilao.getLote().getPreco(),
@@ -127,10 +139,6 @@ public class Principal extends javax.swing.JFrame {
                         " - "
                     });
                 }
-            }
-        } catch (ConnectionException | PersistenceException ex) {
-            JOptionPane.showMessageDialog(rootPane, ex.getMessage(), "ERRO", JOptionPane.ERROR_MESSAGE);
-        }
     }
 
     @SuppressWarnings("unchecked")

@@ -5,6 +5,7 @@ import Domain.Bem;
 import Domain.CategoriaBem;
 import Exception.ConnectionException;
 import Exception.PersistenceException;
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -14,20 +15,20 @@ import java.util.Collection;
 
 public class DAOBem implements IDAOBem {
 
-    DBConnection dbConnection = new DBConnection();
+    Connection conn = null;
+    ResultSet res = null;
+    Statement sta = null;
+    PreparedStatement preparedsta = null;
+    Collection<Bem> bens;
 
     @Override
     public Collection<Bem> getAll() throws ConnectionException, PersistenceException {
-        Collection<Bem> bens = new ArrayList<>();
-        Statement sta = null;
-        ResultSet res = null;
-
         try {
-            dbConnection.open();
-
+            bens = new ArrayList<>();
             String sql = "SELECT b.*, cb.ID as IdCategoria, cb.CATEGORIA FROM Bem b INNER JOIN CategoriaBem cb ON b.IdCategoriaBem = cb.Id";
 
-            sta = dbConnection.getInstance().createStatement();
+            conn = DBConnection.getInstance();
+            sta = conn.createStatement();
             res = sta.executeQuery(sql);
             while (res.next()) {
                 bens.add(new Bem(
@@ -40,19 +41,7 @@ public class DAOBem implements IDAOBem {
         } catch (ConnectionException | SQLException ex) {
             throw new PersistenceException("Erro ao consultar Bens.", ex.getCause());
         } finally {
-            try {
-                if (res != null && !res.isClosed()) {
-                    res.close();
-                }
-                if (sta != null && !sta.isClosed()) {
-                    sta.close();
-                }
-                if (dbConnection != null && dbConnection.isOpen()) {
-                    dbConnection.close();
-                }
-            } catch (SQLException ex) {
-                throw new ConnectionException(ex.getCause());
-            }
+            DBConnection.close(conn, sta, res);
         }
 
         return bens;
@@ -60,61 +49,42 @@ public class DAOBem implements IDAOBem {
 
     @Override
     public int insert(Bem bem) throws ConnectionException {
-        PreparedStatement sta = null;
-        ResultSet res = null;
-
         try {
-            dbConnection.open();
             String sql = "INSERT INTO Bem (IDCATEGORIABEM, DESCRICAO, DESCRICAOCOMPLETA) VALUES (?,?,?)";
 
             if (bem.getId() != 0) {
                 sql = "UPDATE Bem SET IDCATEGORIABEM = ?, DESCRICAO = ?, DESCRICAOCOMPLETA = ? WHERE ID = ?";
             }
 
-            sta = dbConnection.getInstance().prepareStatement(sql);
-            sta.setInt(1, bem.getCategoriaBem().getId());
-            sta.setString(2, bem.getDescricao());
-            sta.setString(3, bem.getDescricaocompleta());
+            conn = DBConnection.getInstance();
+            preparedsta = conn.prepareStatement(sql);
+            preparedsta.setInt(1, bem.getCategoriaBem().getId());
+            preparedsta.setString(2, bem.getDescricao());
+            preparedsta.setString(3, bem.getDescricaocompleta());
 
             if (bem.getId() != 0) {
-                sta.setInt(4, bem.getId());
+                preparedsta.setInt(4, bem.getId());
             }
 
-            return sta.executeUpdate();
+            return preparedsta.executeUpdate();
 
         } catch (SQLException ex) {
             throw new ConnectionException(ex.getCause());
         } finally {
-            try {
-                if (res != null && !res.isClosed()) {
-                    res.close();
-                }
-                if (sta != null && !sta.isClosed()) {
-                    sta.close();
-                }
-                if (dbConnection != null && dbConnection.isOpen()) {
-                    dbConnection.close();
-                }
-            } catch (SQLException ex) {
-                throw new ConnectionException(ex.getCause());
-            }
+            DBConnection.close(conn, preparedsta, null);
         }
     }
 
     @Override
     public Collection<Bem> getAllFree() throws PersistenceException, ConnectionException {
-        Collection<Bem> bens = new ArrayList<>();
-        Statement sta = null;
-        ResultSet res = null;
-
         try {
-            dbConnection.open();
-
+            bens = new ArrayList<>();
             String sql = "select b.ID as IdBem, b.IDCATEGORIABEM, b.DESCRICAO, b.DESCRICAOCOMPLETA, cb.CATEGORIA from bem b\n"
                     + "INNER JOIN CategoriaBem cb ON b.IdCategoriaBem = cb.Id\n"
                     + "where b.ID NOT IN (select idbem from lote_bem)";
 
-            sta = dbConnection.getInstance().createStatement();
+            conn = DBConnection.getInstance();
+            sta = conn.createStatement();
             res = sta.executeQuery(sql);
             while (res.next()) {
                 bens.add(new Bem(
@@ -127,19 +97,7 @@ public class DAOBem implements IDAOBem {
         } catch (ConnectionException | SQLException ex) {
             throw new PersistenceException("Erro ao consultar Bens.", ex.getCause());
         } finally {
-            try {
-                if (res != null && !res.isClosed()) {
-                    res.close();
-                }
-                if (sta != null && !sta.isClosed()) {
-                    sta.close();
-                }
-                if (dbConnection != null && dbConnection.isOpen()) {
-                    dbConnection.close();
-                }
-            } catch (SQLException ex) {
-                throw new ConnectionException(ex.getCause());
-            }
+            DBConnection.close(conn, sta, null);
         }
 
         return bens;
@@ -147,18 +105,13 @@ public class DAOBem implements IDAOBem {
 
     @Override
     public Collection<Bem> getAllById(int idBem) throws PersistenceException, ConnectionException {
-        Collection<Bem> bens = new ArrayList<>();
-        PreparedStatement sta = null;
-        ResultSet res = null;
-
         try {
-            dbConnection.open();
-
+            bens = new ArrayList<>();
             String sql = "SELECT b.*, cb.ID as IdCategoria, cb.CATEGORIA FROM Bem b INNER JOIN CategoriaBem cb ON b.IdCategoriaBem = cb.Id WHERE id = ?";
-
-            sta = dbConnection.getInstance().prepareStatement(sql);
-            sta.setInt(1, idBem);
-            res = sta.executeQuery();
+            conn = DBConnection.getInstance();
+            sta = conn.prepareStatement(sql);
+            preparedsta.setInt(1, idBem);
+            res = preparedsta.executeQuery();
             while (res.next()) {
                 bens.add(new Bem(
                         res.getInt("ID"),
@@ -170,19 +123,7 @@ public class DAOBem implements IDAOBem {
         } catch (ConnectionException | SQLException ex) {
             throw new PersistenceException("Erro ao consultar Bens.", ex.getCause());
         } finally {
-            try {
-                if (res != null && !res.isClosed()) {
-                    res.close();
-                }
-                if (sta != null && !sta.isClosed()) {
-                    sta.close();
-                }
-                if (dbConnection != null && dbConnection.isOpen()) {
-                    dbConnection.close();
-                }
-            } catch (SQLException ex) {
-                throw new ConnectionException(ex.getCause());
-            }
+            DBConnection.close(conn, preparedsta, null);
         }
 
         return bens;
@@ -190,22 +131,18 @@ public class DAOBem implements IDAOBem {
 
     @Override
     public Collection<Bem> getAllByLot(int id) throws PersistenceException, ConnectionException {
-        Collection<Bem> bens = new ArrayList<>();
-        PreparedStatement sta = null;
-        ResultSet res = null;
-
         try {
-            dbConnection.open();
-
+            bens = new ArrayList<>();
             String sql = "select b.ID as IdBem, b.DESCRICAO, b.DESCRICAOCOMPLETA, cb.ID as IDCATEGORIA, cb.CATEGORIA from Lote l "
                     + "inner join lote_bem lb on l.ID = lb.IDLOTE "
                     + "inner join bem b on lb.IDBEM = b.ID "
                     + "inner join categoriabem cb on b.IDCATEGORIABEM = cb.ID "
                     + "where l.ID = ?";
 
-            sta = dbConnection.getInstance().prepareStatement(sql);
-            sta.setInt(1, id);
-            res = sta.executeQuery();
+            conn = DBConnection.getInstance();
+            preparedsta = conn.prepareStatement(sql);
+            preparedsta.setInt(1, id);
+            res = preparedsta.executeQuery();
             while (res.next()) {
                 bens.add(new Bem(
                         res.getInt("IdBem"),
@@ -217,19 +154,7 @@ public class DAOBem implements IDAOBem {
         } catch (ConnectionException | SQLException ex) {
             throw new PersistenceException("Erro ao consultar Bens.", ex.getCause());
         } finally {
-            try {
-                if (res != null && !res.isClosed()) {
-                    res.close();
-                }
-                if (sta != null && !sta.isClosed()) {
-                    sta.close();
-                }
-                if (dbConnection != null && dbConnection.isOpen()) {
-                    dbConnection.close();
-                }
-            } catch (SQLException ex) {
-                throw new ConnectionException(ex.getCause());
-            }
+            DBConnection.close(conn, preparedsta, null);
         }
 
         return bens;

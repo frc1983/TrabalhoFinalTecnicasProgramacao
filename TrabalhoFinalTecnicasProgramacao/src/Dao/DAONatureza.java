@@ -4,6 +4,7 @@ import Connection.DBConnection;
 import Domain.Natureza;
 import Exception.ConnectionException;
 import Exception.PersistenceException;
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -13,20 +14,20 @@ import java.util.Collection;
 
 public class DAONatureza implements IDAONatureza {
 
-    DBConnection dbConnection = new DBConnection();
+    Connection conn = null;
+    ResultSet res = null;
+    Statement sta = null;
+    PreparedStatement preparedsta = null;
+    Collection<Natureza> naturezas;
     
     @Override
     public Collection<Natureza> getAll() throws ConnectionException, PersistenceException {
-        Collection<Natureza> naturezas = new ArrayList<>();
-        Statement sta = null;
-        ResultSet res = null;
-
         try {
-            dbConnection.open();
-
+            naturezas = new ArrayList<>();
             String sql = "SELECT * FROM Natureza";
 
-            sta = dbConnection.getInstance().createStatement();
+            conn = DBConnection.getInstance();
+            sta = conn.createStatement();
             res = sta.executeQuery(sql);
             while (res.next()) {
                 naturezas.add(new Natureza(
@@ -37,19 +38,7 @@ public class DAONatureza implements IDAONatureza {
         } catch (ConnectionException | SQLException ex) {
             throw new PersistenceException("Erro ao consultar naturezas.", ex.getCause());
         } finally {
-            try {
-                if (res != null && !res.isClosed()) {
-                    res.close();
-                }
-                if (sta != null && !sta.isClosed()) {
-                    sta.close();
-                }
-                if (dbConnection != null && dbConnection.isOpen()) {
-                    dbConnection.close();
-                }
-            } catch (SQLException ex) {
-                throw new ConnectionException(ex.getCause());
-            }
+            DBConnection.close(conn, sta, res);
         }
 
         return naturezas;
@@ -57,20 +46,15 @@ public class DAONatureza implements IDAONatureza {
 
     @Override
     public Natureza getById(int id) throws ConnectionException, PersistenceException {
-        Natureza natureza = null;
-        PreparedStatement sta = null;
-        ResultSet res = null;
-
         try {
-            dbConnection.open();
-
             String sql = "SELECT * FROM Natureza WHERE ID = ?";
 
-            sta = dbConnection.getInstance().prepareStatement(sql);
-            sta.setInt(1, id);
-            res = sta.executeQuery();
+            conn = DBConnection.getInstance();
+            preparedsta = conn.prepareStatement(sql);
+            preparedsta.setInt(1, id);
+            res = preparedsta.executeQuery();
             while (res.next()) {
-                natureza = new Natureza(
+                return new Natureza(
                         res.getInt("ID"),
                         res.getString("Nome")
                 );
@@ -78,21 +62,9 @@ public class DAONatureza implements IDAONatureza {
         } catch (ConnectionException | SQLException ex) {
             throw new PersistenceException("Erro ao consultar natureza.", ex.getCause());
         } finally {
-            try {
-                if (res != null && !res.isClosed()) {
-                    res.close();
-                }
-                if (sta != null && !sta.isClosed()) {
-                    sta.close();
-                }
-                if (dbConnection != null && dbConnection.isOpen()) {
-                    dbConnection.close();
-                }
-            } catch (SQLException ex) {
-                throw new ConnectionException(ex.getCause());
-            }
+            DBConnection.close(conn, preparedsta, res);
         }
 
-        return natureza;
+        return null;
     }
 }

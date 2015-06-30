@@ -4,6 +4,7 @@ import Connection.DBConnection;
 import Domain.FormaLance;
 import Exception.ConnectionException;
 import Exception.PersistenceException;
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -13,20 +14,19 @@ import java.util.Collection;
 
 public class DAOFormaLance implements IDAOFormaLance {
 
-    DBConnection dbConnection = new DBConnection();
-    
+    Connection conn = null;
+    ResultSet res = null;
+    Statement sta = null;
+    PreparedStatement preparedsta = null;
+    Collection<FormaLance> formasLance;
+
     @Override
     public Collection<FormaLance> getAll() throws ConnectionException, PersistenceException {
-        Collection<FormaLance> formasLance = new ArrayList<>();
-        Statement sta = null;
-        ResultSet res = null;
-
         try {
-            dbConnection.open();
-
+            formasLance = new ArrayList<>();
             String sql = "SELECT * FROM FORMALANCE";
-
-            sta = dbConnection.getInstance().createStatement();
+            conn = DBConnection.getInstance();
+            sta = conn.createStatement();
             res = sta.executeQuery(sql);
             while (res.next()) {
                 formasLance.add(new FormaLance(
@@ -37,19 +37,7 @@ public class DAOFormaLance implements IDAOFormaLance {
         } catch (ConnectionException | SQLException ex) {
             throw new PersistenceException("Erro ao consultar Formas de lance.", ex.getCause());
         } finally {
-            try {
-                if (res != null && !res.isClosed()) {
-                    res.close();
-                }
-                if (sta != null && !sta.isClosed()) {
-                    sta.close();
-                }
-                if (dbConnection != null && dbConnection.isOpen()) {
-                    dbConnection.close();
-                }
-            } catch (SQLException ex) {
-                throw new ConnectionException(ex.getCause());
-            }
+            DBConnection.close(conn, sta, res);
         }
 
         return formasLance;
@@ -57,20 +45,14 @@ public class DAOFormaLance implements IDAOFormaLance {
 
     @Override
     public FormaLance getById(int id) throws ConnectionException, PersistenceException {
-        FormaLance formaLance = null;
-        PreparedStatement sta = null;
-        ResultSet res = null;
-
         try {
-            dbConnection.open();
-
             String sql = "SELECT * FROM FORMALANCE WHERE ID = ?";
-
-            sta = dbConnection.getInstance().prepareStatement(sql);
-            sta.setInt(1, id);
-            res = sta.executeQuery();
+            conn = DBConnection.getInstance();
+            preparedsta = conn.prepareStatement(sql);
+            preparedsta.setInt(1, id);
+            res = preparedsta.executeQuery();
             while (res.next()) {
-                formaLance = new FormaLance(
+                return new FormaLance(
                         res.getInt("ID"),
                         res.getString("FORMA")
                 );
@@ -78,21 +60,9 @@ public class DAOFormaLance implements IDAOFormaLance {
         } catch (ConnectionException | SQLException ex) {
             throw new PersistenceException("Erro ao consultar Forma de lance.", ex.getCause());
         } finally {
-            try {
-                if (res != null && !res.isClosed()) {
-                    res.close();
-                }
-                if (sta != null && !sta.isClosed()) {
-                    sta.close();
-                }
-                if (dbConnection != null && dbConnection.isOpen()) {
-                    dbConnection.close();
-                }
-            } catch (SQLException ex) {
-                throw new ConnectionException(ex.getCause());
-            }
+            DBConnection.close(conn, preparedsta, res);
         }
 
-        return formaLance;
+        return null;
     }
 }

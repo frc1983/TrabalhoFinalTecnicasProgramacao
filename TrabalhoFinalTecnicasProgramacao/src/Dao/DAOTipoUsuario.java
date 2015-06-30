@@ -4,6 +4,7 @@ import Connection.DBConnection;
 import Exception.ConnectionException;
 import Domain.TipoUsuario;
 import Exception.PersistenceException;
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -11,21 +12,20 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 public class DAOTipoUsuario implements IDAOTipoUsuario {
-
-    DBConnection dbConnection = new DBConnection();
     
+    Connection conn = null;
+    ResultSet res = null;
+    Statement sta = null;
+    Collection<TipoUsuario> tipos;
+
     @Override
     public Collection<TipoUsuario> getAll() throws ConnectionException, PersistenceException {
-        Collection<TipoUsuario> tipos = new ArrayList<>();
-        Statement sta = null;
-        ResultSet res = null;
-
         try {
-            dbConnection.open();
-
+            tipos = new ArrayList<>();
             String sql = "SELECT * FROM TipoUsuario";
 
-            sta = dbConnection.getInstance().createStatement();
+            conn = DBConnection.getInstance();
+            sta = conn.createStatement();
             res = sta.executeQuery(sql);
             while (res.next()) {
                 tipos.add(new TipoUsuario(
@@ -36,19 +36,7 @@ public class DAOTipoUsuario implements IDAOTipoUsuario {
         } catch (ConnectionException | SQLException ex) {
             throw new PersistenceException("Erro ao consultar Tipos de usuários.", ex.getCause());
         } finally {
-            try {
-                if (res != null && !res.isClosed()) {
-                    res.close();
-                }
-                if (sta != null && !sta.isClosed()) {
-                    sta.close();
-                }
-                if (dbConnection != null && dbConnection.isOpen()) {
-                    dbConnection.close();
-                }
-            } catch (SQLException ex) {
-                throw new ConnectionException(ex.getCause());
-            }
+            DBConnection.close(conn, sta, res);
         }
 
         return tipos;

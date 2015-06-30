@@ -1,5 +1,7 @@
 package View;
 
+import static Business.LanceBusiness.validaLance;
+import Business.LeilaoBusiness;
 import Domain.Bem;
 import Domain.Lance;
 import Domain.Leilao;
@@ -7,18 +9,17 @@ import Domain.Lote;
 import Domain.Usuario;
 import Enumerators.EnumFormaLance;
 import Enumerators.EnumStatusLeilao;
-import Enumerators.EnumTipoUsuario;
 import Exception.ConnectionException;
+import Exception.LanceException;
 import Exception.PersistenceException;
 import Facade.BemFacade;
 import Facade.LanceFacade;
 import Facade.LeilaoFacade;
 import Facade.UsuarioFacade;
+import Helpers.ConverterHelper;
 import Helpers.PopulateComponents;
 import java.math.BigDecimal;
 import java.util.Collection;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javafx.util.Pair;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListModel;
@@ -51,11 +52,7 @@ public class DialogLance extends javax.swing.JFrame {
 
         leilao = leilaoFacade.buscarPorId(idLeilao);
 
-        if (leilao.getUsuario().getTipoUsuario().getId() == EnumTipoUsuario.COMPRADOR) {
-            usuarios = usuarioFacade.buscarTodosPorTipo(EnumTipoUsuario.VENDEDOR);
-        } else {
-            usuarios = usuarioFacade.buscarTodosPorTipo(EnumTipoUsuario.COMPRADOR);
-        }
+        usuarios = LeilaoBusiness.configuraUsuariosLance(leilao);
 
         maiorLance = lanceFacade.buscarMelhorLancePorLote(idLeilao, leilao.getNatureza().getId());
         if (maiorLance != null) {
@@ -75,6 +72,8 @@ public class DialogLance extends javax.swing.JFrame {
                 txtUsuarioVencedor.setText("");
                 txtLanceVencedor.setText("");
             }
+        } else if (statusLeilao == EnumStatusLeilao.TERMINADO){
+            configureListLances(idLeilao);
         }
 
         txtNatureza.setText(leilao.getNatureza().getNome());
@@ -347,17 +346,13 @@ public class DialogLance extends javax.swing.JFrame {
 
     private void btnEfetuarLanceActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEfetuarLanceActionPerformed
         try {
-            BigDecimal preco;
-            if ("".equals(txtLance.getText())) {
-                preco = new BigDecimal(0);
-            } else {
-                preco = BigDecimal.valueOf(Double.parseDouble(txtLance.getText().replace(".", "").replace(',', '.')));
-            }
+            BigDecimal preco = ConverterHelper.convertMoney(txtLance.getText());
 
             Pair<Integer, String> selectedUsuario = (Pair<Integer, String>) cmbUsuarios.getSelectedItem();
             Usuario u = usuarioFacade.buscarPorId(selectedUsuario.getKey());
 
             Lance l = new Lance(0, null, null, preco, lote, u);
+            validaLance(l);
 
             int idLance = lanceFacade.cadastrarLance(l);
             if (idLance > 0) {
@@ -365,7 +360,7 @@ public class DialogLance extends javax.swing.JFrame {
                 txtLance.setText("");
                 JOptionPane.showMessageDialog(rootPane, "Lance efetuado", null, JOptionPane.INFORMATION_MESSAGE);
             }
-        } catch (PersistenceException | ConnectionException ex) {
+        } catch (LanceException | PersistenceException | ConnectionException ex) {
             JOptionPane.showMessageDialog(rootPane, ex.getMessage(), "ERRO", JOptionPane.ERROR_MESSAGE);
         }
     }//GEN-LAST:event_btnEfetuarLanceActionPerformed

@@ -5,6 +5,7 @@ import Exception.ConnectionException;
 import Domain.TipoUsuario;
 import Domain.Usuario;
 import Exception.PersistenceException;
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -14,20 +15,20 @@ import java.util.Collection;
 
 public class DAOUsuario implements IDAOUsuario{
 
-    DBConnection dbConnection = new DBConnection();
+    Connection conn = null;
+    ResultSet res = null;
+    Statement sta = null;
+    PreparedStatement preparedsta = null;
+    Collection<Usuario> usuarios;
     
     @Override
     public Collection<Usuario> getAll() throws ConnectionException, PersistenceException {
-        Collection<Usuario> usuarios = new ArrayList<>();
-        Statement sta = null;
-        ResultSet res = null;
-
         try {
-            dbConnection.open();
-
+            usuarios = new ArrayList<>();
             String sql = "SELECT u.*, tu.ID as IdTIPO, tu.TIPO FROM Usuario u INNER JOIN TipoUsuario tu ON u.IdTipoUsuario = tu.Id";
 
-            sta = dbConnection.getInstance().createStatement();
+            conn = DBConnection.getInstance();
+            sta = conn.createStatement();
             res = sta.executeQuery(sql);
             while (res.next()) {
                 usuarios.add(new Usuario(
@@ -41,19 +42,7 @@ public class DAOUsuario implements IDAOUsuario{
         } catch (ConnectionException | SQLException ex) {
             throw new PersistenceException("Erro ao consultar Usuários.", ex.getCause());
         } finally {
-            try {
-                if (res != null && !res.isClosed()) {
-                    res.close();
-                }
-                if (sta != null && !sta.isClosed()) {
-                    sta.close();
-                }
-                if (dbConnection != null && dbConnection.isOpen()) {
-                    dbConnection.close();
-                }
-            } catch (SQLException ex) {
-                throw new ConnectionException(ex.getCause());
-            }
+            DBConnection.close(conn, sta, res);
         }
 
         return usuarios;
@@ -61,45 +50,30 @@ public class DAOUsuario implements IDAOUsuario{
 
     @Override
     public boolean insert(Usuario usuario) throws ConnectionException, PersistenceException {
-        PreparedStatement sta = null;
-        ResultSet res = null;
-
         try {
-            dbConnection.open();
             String sql = "INSERT INTO Usuario (IDTIPOUSUARIO, NOME, CPFCNPJ, EMAIL) VALUES (?,?,?,?)";
 
             if (usuario.getId() != 0) {
                 sql = "UPDATE Usuario SET IDTIPOUSUARIO = ?, NOME = ?, CPFCNPJ = ?, EMAIL = ? WHERE ID = ?";
             }
 
-            sta = dbConnection.getInstance().prepareStatement(sql);
-            sta.setInt(1, usuario.getTipoUsuario().getId());
-            sta.setString(2, usuario.getNome());
-            sta.setLong(3, Long.parseLong(usuario.getCpfCnpj()));
-            sta.setString(4, usuario.getEmail());
+            conn = DBConnection.getInstance();
+            preparedsta = conn.prepareStatement(sql);
+            preparedsta.setInt(1, usuario.getTipoUsuario().getId());
+            preparedsta.setString(2, usuario.getNome());
+            preparedsta.setLong(3, Long.parseLong(usuario.getCpfCnpj()));
+            preparedsta.setString(4, usuario.getEmail());
 
             if (usuario.getId() != 0) {
-                sta.setInt(5, usuario.getId());
+                preparedsta.setInt(5, usuario.getId());
             }
 
-            sta.executeUpdate();
+            preparedsta.executeUpdate();
             
         } catch (ConnectionException | SQLException ex) {
-            throw new ConnectionException(ex.getCause());
+            throw new PersistenceException("Erro ao inserir Usuário.", ex.getCause());
         } finally {
-            try {
-                if (res != null && !res.isClosed()) {
-                    res.close();
-                }
-                if (sta != null && !sta.isClosed()) {
-                    sta.close();
-                }
-                if (dbConnection != null && dbConnection.isOpen()) {
-                    dbConnection.close();
-                }
-            } catch (SQLException ex) {
-                throw new ConnectionException(ex.getCause());
-            }
+            DBConnection.close(conn, preparedsta, null);
         }
         
         return true;
@@ -107,18 +81,14 @@ public class DAOUsuario implements IDAOUsuario{
     
     @Override
     public Collection<Usuario> getAllByType(int typeId) throws ConnectionException, PersistenceException {
-        Collection<Usuario> usuarios = new ArrayList<>();
-        PreparedStatement sta = null;
-        ResultSet res = null;
-
         try {
-            dbConnection.open();
-
+            usuarios = new ArrayList<>();
             String sql = "SELECT u.*, tu.ID as IdTIPO, tu.TIPO FROM Usuario u INNER JOIN TipoUsuario tu ON u.IdTipoUsuario = tu.Id WHERE u.idtipoUsuario = ?";
 
-            sta = dbConnection.getInstance().prepareStatement(sql);
-            sta.setInt(1, typeId);
-            res = sta.executeQuery();
+            conn = DBConnection.getInstance();
+            preparedsta = conn.prepareStatement(sql);
+            preparedsta.setInt(1, typeId);
+            res = preparedsta.executeQuery();
             while (res.next()) {
                 usuarios.add(new Usuario(
                         res.getInt("ID"),
@@ -131,19 +101,7 @@ public class DAOUsuario implements IDAOUsuario{
         } catch (ConnectionException | SQLException ex) {
             throw new PersistenceException("Erro ao consultar Usuários.", ex.getCause());
         } finally {
-            try {
-                if (res != null && !res.isClosed()) {
-                    res.close();
-                }
-                if (sta != null && !sta.isClosed()) {
-                    sta.close();
-                }
-                if (dbConnection != null && dbConnection.isOpen()) {
-                    dbConnection.close();
-                }
-            } catch (SQLException ex) {
-                throw new ConnectionException(ex.getCause());
-            }
+            DBConnection.close(conn, preparedsta, res);
         }
 
         return usuarios;
@@ -151,20 +109,15 @@ public class DAOUsuario implements IDAOUsuario{
     
     @Override
     public Usuario getById(int id) throws ConnectionException, PersistenceException {
-        Usuario usuario = null;
-        PreparedStatement sta = null;
-        ResultSet res = null;
-
         try {
-            dbConnection.open();
-
             String sql = "SELECT u.*, tu.ID as IdTIPO, tu.TIPO FROM Usuario u INNER JOIN TipoUsuario tu ON u.IdTipoUsuario = tu.Id WHERE u.id = ?";
 
-            sta = dbConnection.getInstance().prepareStatement(sql);
-            sta.setInt(1, id);
-            res = sta.executeQuery();
+            conn = DBConnection.getInstance();
+            preparedsta = conn.prepareStatement(sql);
+            preparedsta.setInt(1, id);
+            res = preparedsta.executeQuery();
             while (res.next()) {
-                usuario = new Usuario(
+                return new Usuario(
                         res.getInt("ID"),
                         res.getString("NOME"),
                         res.getString("CPFCNPJ"),
@@ -175,21 +128,9 @@ public class DAOUsuario implements IDAOUsuario{
         } catch (ConnectionException | SQLException ex) {
             throw new PersistenceException("Erro ao consultar Usuários.", ex.getCause());
         } finally {
-            try {
-                if (res != null && !res.isClosed()) {
-                    res.close();
-                }
-                if (sta != null && !sta.isClosed()) {
-                    sta.close();
-                }
-                if (dbConnection != null && dbConnection.isOpen()) {
-                    dbConnection.close();
-                }
-            } catch (SQLException ex) {
-                throw new ConnectionException(ex.getCause());
-            }
+            DBConnection.close(conn, preparedsta, res);
         }
 
-        return usuario;
+        return null;
     }
 }

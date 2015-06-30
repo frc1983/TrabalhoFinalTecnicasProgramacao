@@ -3,19 +3,25 @@ package Connection;
 import Exception.ConnectionException;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 
-public class DBConnection implements IConnection {
+public class DBConnection {
 
-    private Connection connection;
+    private static Connection connection = null;
     private static final String USER = "usuario";
     private static final String PASS = "senha";
-    
-    public Connection getInstance() throws ConnectionException{
+
+    public static Connection getInstance() throws ConnectionException {
+        if (connection == null) {
+            connection = createConnection();
+        }
+
         return connection;
     }
 
-    private Connection createConnection() throws ConnectionException {        
+    private static Connection createConnection() throws ConnectionException {
         try {
             Class.forName("org.apache.derby.jdbc.ClientDriver").newInstance();
             connection = DriverManager.getConnection("jdbc:derby://localhost:1527/TrabalhoFinal", USER, PASS);
@@ -27,7 +33,23 @@ public class DBConnection implements IConnection {
         return connection;
     }
 
-    private boolean hasTransaction() throws ConnectionException {
+    public static void close(Connection conn, Statement sta, ResultSet res) throws ConnectionException {
+        try {
+        if (res != null && !res.isClosed()) {
+            res.close();
+        }
+        if (sta != null && !sta.isClosed()) {
+            sta.close();
+        }
+        if (conn != null && conn.isClosed()) {
+            conn.close();
+        }
+        } catch (SQLException e){
+            throw new ConnectionException(e);
+        }
+    }
+
+    private static boolean hasTransaction() throws ConnectionException {
         try {
             return !connection.getAutoCommit();
         } catch (SQLException e) {
@@ -35,33 +57,7 @@ public class DBConnection implements IConnection {
         }
     }
 
-    @Override
-    public Connection getConnection() throws ConnectionException {
-        this.open();
-        return connection;
-    }
-
-    @Override
-    public void open() throws ConnectionException {
-        if (connection == null) {
-            connection = createConnection();
-        }
-    }
-
-    @Override
-    public void close() throws ConnectionException {
-        if (connection != null) {
-            try {
-                connection.close();
-                connection = null;
-            } catch (SQLException e) {
-                throw new ConnectionException(e);
-            }
-        }
-    }
-
-    @Override
-    public void openTransaction() throws ConnectionException {
+    public static void openTransaction() throws ConnectionException {
         try {
             if (!hasTransaction()) {
                 connection.setAutoCommit(false);
@@ -71,42 +67,11 @@ public class DBConnection implements IConnection {
         }
     }
 
-    @Override
-    public void closeTransaction() throws ConnectionException {
+    public static void closeTransaction() throws ConnectionException {
         try {
             if (!hasTransaction()) {
                 connection.setAutoCommit(true);
             }
-        } catch (SQLException e) {
-            throw new ConnectionException(e);
-        }
-    }
-
-    @Override
-    public void commit() throws ConnectionException {
-        try {
-            if (hasTransaction()) {
-                connection.commit();
-            }
-        } catch (SQLException e) {
-            throw new ConnectionException(e);
-        }
-    }
-
-    @Override
-    public void rollback() throws ConnectionException {
-        try {
-            if (hasTransaction()) {
-                connection.rollback();
-            }
-        } catch (SQLException e) {
-            throw new ConnectionException(e);
-        }
-    }
-
-    public boolean isOpen() throws ConnectionException {
-        try {
-            return !connection.isClosed();
         } catch (SQLException e) {
             throw new ConnectionException(e);
         }

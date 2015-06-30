@@ -256,7 +256,6 @@
         <Property name="formatterFactory" type="javax.swing.JFormattedTextField$AbstractFormatterFactory" editor="org.netbeans.modules.form.editors.AbstractFormatterFactoryEditor">
           <Format format="#,##0.00" subtype="-1" type="4"/>
         </Property>
-        <Property name="text" type="java.lang.String" value="1234,99"/>
       </Properties>
     </Component>
     <Component class="javax.swing.JLabel" name="jLabel8">
@@ -269,7 +268,6 @@
         <Property name="formatterFactory" type="javax.swing.JFormattedTextField$AbstractFormatterFactory" editor="org.netbeans.modules.form.editors.AbstractFormatterFactoryEditor">
           <Format format="yyyy-MM-dd" subtype="-1" type="1"/>
         </Property>
-        <Property name="text" type="java.lang.String" value="2014-12-10"/>
         <Property name="toolTipText" type="java.lang.String" value=""/>
       </Properties>
     </Component>
@@ -278,7 +276,6 @@
         <Property name="formatterFactory" type="javax.swing.JFormattedTextField$AbstractFormatterFactory" editor="org.netbeans.modules.form.editors.AbstractFormatterFactoryEditor">
           <Format subtype="1" type="2"/>
         </Property>
-        <Property name="text" type="java.lang.String" value="13:00"/>
       </Properties>
     </Component>
     <Component class="javax.swing.JFormattedTextField" name="txtDataTermino">
@@ -286,7 +283,6 @@
         <Property name="formatterFactory" type="javax.swing.JFormattedTextField$AbstractFormatterFactory" editor="org.netbeans.modules.form.editors.AbstractFormatterFactoryEditor">
           <Format format="yyy-MM-dd" subtype="-1" type="1"/>
         </Property>
-        <Property name="text" type="java.lang.String" value="2014-12-10"/>
       </Properties>
     </Component>
     <Component class="javax.swing.JLabel" name="jLabel9">
@@ -299,7 +295,6 @@
         <Property name="formatterFactory" type="javax.swing.JFormattedTextField$AbstractFormatterFactory" editor="org.netbeans.modules.form.editors.AbstractFormatterFactoryEditor">
           <Format subtype="1" type="2"/>
         </Property>
-        <Property name="text" type="java.lang.String" value="14:00"/>
       </Properties>
     </Component>
     <Component class="javax.swing.JSeparator" name="jSeparator1">
