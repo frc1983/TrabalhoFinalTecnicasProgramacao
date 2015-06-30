@@ -92,25 +92,31 @@ insert into Natureza VALUES (default, 'DEMANDA');
 insert into FormaLance VALUES (default, 'ABERTO');
 insert into FormaLance VALUES (default, 'FECHADO');
 
-insert into CategoriaBem VALUES (default, 'Mobili�rio');
-insert into CategoriaBem VALUES (default, 'Inform�tica');
-insert into CategoriaBem VALUES (default, 'M�quinas industriais');
-insert into CategoriaBem VALUES (default, 'M�quinas de escrit�rio');
+insert into CategoriaBem VALUES (default, 'Mobiliário');
+insert into CategoriaBem VALUES (default, 'Informática');
+insert into CategoriaBem VALUES (default, 'Máquinas industriais');
+insert into CategoriaBem VALUES (default, 'Máquinas de escritório');
 insert into CategoriaBem VALUES (default, 'Equipamentos hospitalares');
 
-insert into Bem VALUES (default, (select ID from CATEGORIABEM where CATEGORIA = 'Mobili�rio'), 'Estante de madeira', 'Estante de madeira com 4 prateleiras em mogno escuro');
-insert into Bem VALUES (default, (select ID from CATEGORIABEM where CATEGORIA = 'Mobili�rio'), 'Estante de a�o', 'Estante de a�o escovado');
-insert into Bem VALUES (default, (select ID from CATEGORIABEM where CATEGORIA = 'Inform�tica'), 'Notebook 3d', 'Positivo 3d com �culos dos anos 1990.');
+insert into Bem VALUES (default, (select ID from CATEGORIABEM where CATEGORIA = 'Mobiliário'), 'Estante de madeira', 'Estante de madeira com 4 prateleiras em mogno escuro');
+insert into Bem VALUES (default, (select ID from CATEGORIABEM where CATEGORIA = 'Mobiliário'), 'Estante de aço', 'Estante de aço escovado');
+insert into Bem VALUES (default, (select ID from CATEGORIABEM where CATEGORIA = 'Informática'), 'Notebook 3d', 'Positivo 3d com óculos dos anos 1990.');
 insert into Bem VALUES (default, (select ID from CATEGORIABEM where CATEGORIA = 'Equipamentos hospitalares'), 'Scanner cerebral', 'Scanner cerebral para ver se tem algo dentro.');
+insert into Bem VALUES (default, (select ID from CATEGORIABEM where CATEGORIA = 'Informática'), 'Desktop DELL', 'PC Desktop DELL 4gb RAM i5.');
+insert into Bem VALUES (default, (select ID from CATEGORIABEM where CATEGORIA = 'Máquinas de escritório'), 'Estante de aço', 'Estante de aço escovado.');
+insert into Bem VALUES (default, (select ID from CATEGORIABEM where CATEGORIA = 'Máquinas de escritório'), 'Grampeador', 'Grampeador simples.');
+insert into Bem VALUES (default, (select ID from CATEGORIABEM where CATEGORIA = 'Máquinas de escritório'), 'Máquina de escrever', 'Máquina de escrever elétrica.');
 
 insert into USUARIO VALUES (default, (select ID from TIPOUSUARIO where TIPO = 'COMPRADOR'), 'Teste comprador', '00136985214', 'testescomprador@gmail.com');
 insert into USUARIO VALUES (default, (select ID from TIPOUSUARIO where TIPO = 'VENDEDOR'), 'Teste vendedor', '12345678945678', 'testesvendedor@gmail.com');
+insert into USUARIO VALUES (default, (select ID from TIPOUSUARIO where TIPO = 'COMPRADOR'), 'Teste comprador 1', '02347895945678', 'testescomprador1@gmail.com');
+insert into USUARIO VALUES (default, (select ID from TIPOUSUARIO where TIPO = 'VENDEDOR'), 'Teste vendedor 1', '00125236958', 'testesvendedor1@gmail.com');
 
 insert into Lote VALUES (default, 1111.45);
 insert into Lote VALUES (default, 2222.95);
 
 insert into Lote_bem VALUES ((SELECT ID FROM LOTE WHERE PRECO = 1111.45), (SELECT ID FROM BEM WHERE DESCRICAO = 'Estante de madeira'));
-insert into Lote_bem VALUES ((SELECT ID FROM LOTE WHERE PRECO = 1111.45), (SELECT ID FROM BEM WHERE DESCRICAO = 'Estante de a�o'));
+insert into Lote_bem VALUES ((SELECT ID FROM LOTE WHERE PRECO = 1111.45), (SELECT ID FROM BEM WHERE DESCRICAO = 'Estante de aço'));
 insert into Lote_bem VALUES ((SELECT ID FROM LOTE WHERE PRECO = 2222.95), (SELECT ID FROM BEM WHERE DESCRICAO = 'Notebook 3d'));
 
 insert into Leilao VALUES (default, 
@@ -140,9 +146,3 @@ insert into Lance VALUES (default, (SELECT id from USUARIO WHERE NOME = 'Teste c
 
 insert into Lance VALUES (default, (SELECT id from USUARIO WHERE NOME = 'Teste vendedor'), (SELECT ID FROM LOTE WHERE PRECO = 2222.95), '2014-12-10', '14:15', 2220.95);
 insert into Lance VALUES (default, (SELECT id from USUARIO WHERE NOME = 'Teste comprador'), (SELECT ID FROM LOTE WHERE PRECO = 2222.95), '2014-12-10', '14:45', 2223.95);
-	
-
-
-
-
-
