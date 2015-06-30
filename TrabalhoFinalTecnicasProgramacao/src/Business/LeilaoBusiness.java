@@ -29,7 +29,7 @@ public class LeilaoBusiness {
     }
 
     public static Collection<Usuario> configuraUsuariosLance(Leilao leilao) throws ConnectionException, PersistenceException {
-        Collection<Usuario> usuarios = new ArrayList<>();
+        Collection<Usuario> usuarios;
         if (leilao.getUsuario().getTipoUsuario().getId() == EnumTipoUsuario.COMPRADOR) {
             usuarios = new UsuarioFacade().buscarTodosPorTipo(EnumTipoUsuario.VENDEDOR);
         } else {

@@ -35,16 +35,16 @@ public class DBConnection {
 
     public static void close(Connection conn, Statement sta, ResultSet res) throws ConnectionException {
         try {
-        if (res != null && !res.isClosed()) {
-            res.close();
-        }
-        if (sta != null && !sta.isClosed()) {
-            sta.close();
-        }
-        if (conn != null && conn.isClosed()) {
-            conn.close();
-        }
-        } catch (SQLException e){
+            if (res != null && !res.isClosed()) {
+                res.close();
+            }
+            if (sta != null && !sta.isClosed()) {
+                sta.close();
+            }
+            if (conn != null && conn.isClosed()) {
+                conn.close();
+            }
+        } catch (SQLException e) {
             throw new ConnectionException(e);
         }
     }
