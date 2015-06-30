@@ -380,10 +380,11 @@ public class DialogCadastroLeilao extends javax.swing.JFrame {
 
     private void btnAdicionarLoteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAdicionarLoteActionPerformed
         for (int i = 0; i < listBens.getModel().getSize(); i++) {
-            if (((Bem) listBens.getModel().getElementAt(i)).getDescricao().equals(((Bem) listBens.getSelectedValue()).getDescricao())) {
-                modelLote.addElement((Bem) listBens.getSelectedValue());
-                modelDisponiveis.removeElement((Bem) listBens.getSelectedValue());
-            }
+            if(listBens != null && listBens.getModel() != null)
+                if (((Bem) listBens.getModel().getElementAt(i)).getDescricao().equals(((Bem) listBens.getSelectedValue()).getDescricao())) {
+                    modelLote.addElement((Bem) listBens.getSelectedValue());
+                    modelDisponiveis.removeElement((Bem) listBens.getSelectedValue());
+                }
         }
     }//GEN-LAST:event_btnAdicionarLoteActionPerformed
 

@@ -64,7 +64,7 @@ public class DAOLance implements IDAOLance {
         } catch (ConnectionException | SQLException ex) {
             throw new PersistenceException("Erro ao consultar Lances.", ex.getCause());
         } finally {
-            DBConnection.close(conn, preparedsta, null);
+            DBConnection.close(conn, preparedsta, res);
         }
 
         return lances;
@@ -75,13 +75,14 @@ public class DAOLance implements IDAOLance {
         try {
             String sql = "";
             if(idNatureza == EnumNatureza.OFERTA)
-                sql = "SELECT * FROM LANCE WHERE IDLOTE = ? ORDER BY VALOR ASC";
+                sql = "SELECT * FROM LANCE la WHERE IDLOTE = ? AND VALOR < (select PRECO from lote where id = ?) ORDER BY VALOR DESC";
             else if(idNatureza == EnumNatureza.DEMANDA)
-                sql = "SELECT * FROM LANCE WHERE IDLOTE = ? ORDER BY VALOR DESC";
+                sql = "SELECT * FROM LANCE WHERE IDLOTE = ? AND VALOR >= (select PRECO from lote where id = ?) ORDER BY VALOR DESC";
 
             conn = DBConnection.getInstance();
             preparedsta = conn.prepareStatement(sql);
             preparedsta.setInt(1, idLote);
+            preparedsta.setInt(2, idLote);
             res = preparedsta.executeQuery();
             while (res.next()) {
                 return new Lance(
